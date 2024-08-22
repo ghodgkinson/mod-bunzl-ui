@@ -1,0 +1,26 @@
+/**  12/18/02 DIST3713 NLM PROGRAM CREATION                       */
+/******************************************************************/
+/**       ALL DISTRIBUTION SYSTEM MENUS USE                       */
+/**       LDA POSITIONS 257 THRU 285 FOR COMPANY/LOCATION         */
+/**       DATA LOADED FROM PROGRAM DSB002                         */
+/**  03/15/04 DIST4482-02 NLM Add previous and destination menus */
+/**  09/20/04 DIST4726    NLM Get output queue like the old menus did */
+/**  12/29/04 DIST491601  SAK Remove Incoming parms.  No longer   */
+/**                           needed.                             */
+/**  09/07/07 DIST6689    SAK Add logic to check number of        */
+/**                           allowable signons.                  */
+/******************************************************************/
+             PGM
+
+             DCL        VAR(&FRMENU) TYPE(*CHAR) LEN(10)
+             DCL        VAR(&TOMENU) TYPE(*CHAR) LEN(10)
+
+             DCL        VAR(&OUTQ) TYPE(*CHAR) LEN(10) VALUE('PRT01')
+/*A6689*/    DCL        VAR(&LIBTHERE) TYPE(*CHAR) LEN(1) VALUE('N')
+
+
+             CALL       PGM(DSB002)
+
+             CALL       PGM(MNU003) PARM(&OUTQ &FRMENU &TOMENU)
+
+             ENDPGM

@@ -1,0 +1,254 @@
+     A*%%TS  DD  20040816  115336  NMcmahon    REL-V5.0.1  WDSc
+     A**************************************************************************
+     A*                                                                        *
+     A*  OBJECT NAME.: MNU003FM                                                *
+     A*  DATE CREATED: 12/09/02                                                *
+     A*  CREATED BY..: NANCY MCMAHON                                           *
+     A*  PROJECT# ...: DIST3713                                                *
+     A*  DESCRIPTION.: THIS DISPLAY FILE WILL DISPLAY A GENERIC MENU           *
+     A*                WITH OPTIONS BASED ON THE BUNZL MENU SYSTEM             *
+     A*                                                                        *
+     A**************************************************************************
+     A**************************************************************************
+     A*   MODIFICATIONS:                                                       *
+     A*------------------------------------------------------------------------*
+     A*   NAME    DATE   DIST#  DESCRIPTION                                    *
+     A*   ----  -------- ------ -----------------------------------------------*
+     A*   NLM   08/16/04 4726   Add F11 menu options                           *
+     A*                         limit the F3                                   *
+      *                                                                        *
+      *   SAK   12/23/04 491601 Add limitations to report selection.           *
+      *                                                                        *
+      *   SAK   04/14/05 494107 Change command key layout.  Change F11 from    *
+      *                         Settings to Change Co#.  Settings is now F13.  *
+      *                                                                        *
+      *   CAL   09/13/05 514860 Add formats for handheld               from    *
+      *                                                                        *
+      *   rdw   05/11/06 5673   Remove F8=Send Message                         *
+      *                         Remove F10=Password from this screen.          *
+     A**************************************************************************
+     A*%%FD Bunzl Menu System
+     A                                      DSPSIZ(24 80 *DS3)
+     A                                      PRINT
+     A                                      ALTHELP(CA13)
+     A                                      INDARA
+     A                                      HELP(13 'BUNZL HELP')
+     A                                      MOUBTN(*ULD CF02)
+     A N01                                  ENTFLDATR((*COLOR YLW) (*DSPATR UL))
+      *
+     A**************************************************************************
+     A          R MNU003S1
+      *
+     A                                      SFL
+     A                                      SFLNXTCHG
+     A*
+     A            @OPTION#       3Y 0O  5  2EDTWRD('  0.')
+     A            @ODESC        70A  O  5  7
+     A*
+     A**************************************************************************
+     A          R MNU003C1
+      *
+     A                                      SFLCTL(MNU003S1)
+     A*
+D4941 * 59                                  HOME(03)
+     A  59                                  CF03(03 'Initial Menu')
+     A                                      CF02(02 'Select Position')
+     A                                      CF04(04 'Search')
+C4941A  58                                  CF05(05 'Settings')
+     A                                      CF06(06 'Messages')
+     A                                      CF07(07 'Jobs')
+D5673A*                                      CF08(08 'Send Message')
+     A                                      CF09(09 'Output')
+D5673A*                                      CF10(10 'Password')
+C4941A                                      CF11(11 'Change Co#')
+     A  57                                  CF12(12 'Cancel')
+     A  64                                  CF14(14 'Jump to Menu')
+     A  65
+     AO 55                                  CF15(15 'Edit Menu Data')
+     A  66                                  CF16(16 'Jump to Menu')
+     A  67                                  CF17(17 'Jump to Menu')
+     A  68                                  CF18(18 'Jump to Menu')
+     A  69                                  CF19(19 'Jump to Menu')
+     A  70                                  CF20(20 'Jump to Menu')
+     A  71                                  CF21(21 'Jump to Menu')
+     A  72                                  CF22(22 'Jump to Menu')
+     A  73                                  CF23(23 'Jump to Menu')
+     A  74                                  CF24(24 'Jump to Menu')
+     A*
+     A                                      SFLSIZ(15)
+     A                                      SFLPAG(15)
+     A                                      PAGEUP(92)
+     A N98                                  PAGEDOWN(90)
+     A                                      OVERLAY
+     A N91                                  SFLDSP
+     A                                      SFLDSPCTL
+     A  91                                  SFLCLR
+     A  98                                  SFLEND(*MORE)
+     A                                      SFLCSRRRN(&S1CSR)
+     A            REC#           4S 0H      SFLRCDNBR
+     A            S1CSR          5S 0H
+A5673A            @FRMMENU      10   H
+     A                                  1  2'Co#'
+     A  52                                  DSPATR(ND)
+     A            @CO#           2Y 0O  1  6COLOR(WHT)
+     A  52                                  DSPATR(ND)
+     A            @LOCN          3A  O  1  9COLOR(WHT)
+     A  52                                  DSPATR(ND)
+     A            @TITLE        58   O  1 13DSPATR(HI)
+     A                                  1 72'MNU003C1'
+     A            @MENU         10   O  2 38
+A4916A                                  2 61SYSNAME
+  |  A                                  2 72DATE
+A4916A                                      EDTCDE(Y)
+     A                                  3  1' Select one of the following:'
+A4916A                                  3 61USER
+     A                                  3 72TIME
+     A            @MSG          20   O  4 58
+      *
+     A**************************************************************************
+     A          R MNU003M1
+      *
+     A                                      OVERLAY
+     A                                 21  2'Option:'
+     A            @SLCTOP        3Y 0B 21 10EDTCDE(Z)
+     A  51                                  DSPATR(PC)
+     A  51                                  DSPATR(RI)
+C4916A  60                             21 15' Enter "R" for Report Menu: '
+C4916A  60        @REPORT        1   B 21 44
+     A                                 21 52'Printer Outque'
+     A            @OUTQ         10   B 21 67
+     A  53                                  DSPATR(PC)
+     A  53                                  DSPATR(RI)
+     A  59        @F3MSG        13   O 22  2COLOR(BLU)
+C4941A                                 22 17'F4=Search'
+     A                                      COLOR(BLU)
+A4941A  58                             22 31'F5=Settings'
+  |  A                                      COLOR(BLU)
+  |  A                                 22 47'F6=Messages'
+  |  A                                      COLOR(BLU)
+  |  A                                 22 61'F7=Jobs'
+  |  A                                      COLOR(BLU)
+  |  A*D5673                            22 66'F8=Send Message'
+  |  A*D5673                                 COLOR(BLU)
+  |  A                                 23  2'F9=Output'
+  |  A                                      COLOR(BLU)
+  |  A*D5673                            23 17'F10=Password'
+  |  A*D5673                                 COLOR(BLU)
+  |  A                                 23 31'F11=Chg Co/Lcn'
+  |  A                                      COLOR(BLU)
+  |  A  57        @F12MSG       24   O 23 47COLOR(BLU)
+  |  A  55                             23 73'F15=Edit'
+A4941A                                      COLOR(BLU)
+D4941 * 57        @F12MSG       24   O 22 29COLOR(BLU)
+  |  A* 55                             23 73'F15=Edit'
+  |  A*                                     COLOR(BLU)
+  |  A*                                23  2'F6=Messages'
+  |  A*                                     COLOR(BLU)
+  |  A*                                23 18'F7=Jobs'
+  |  A*                                     COLOR(BLU)
+  |  A*                                23 29'F8=Send Message'
+  |  A*                                     COLOR(BLU)
+  |  A*                                23 46'F9=Output'
+  |  A*                                     COLOR(BLU)
+  |  A*                                23 58'F10=Password'
+  |  A*                                     COLOR(BLU)
+  |  A* 58                             22 58'F11=Settings'
+D4941A* 58                                  COLOR(BLU)
+      *
+      *           @MSG          80   O 24  1DSPATR(HI)
+     A*****************************************************************
+     A          R MNU003SM
+      *
+     A                                      SFL
+     A                                      SFLMSGRCD(24)
+     A            ESF_MSGKEY                SFLMSGKEY
+     A            @PGMQ                     SFLPGMQ
+      *
+     A          R MNU003CM
+      *
+     A                                      SFLCTL(MNU003SM)
+     A                                      SFLSIZ(2)
+     A                                      SFLPAG(1)
+     A                                      OVERLAY
+     A N99                                  SFLDSP
+     A N99                                  SFLDSPCTL
+     A                                      SFLINZ
+     A N99                                  SFLEND
+     A            @PGMQ                     SFLPGMQ
+     A**************************************************************************
+A5148A          R MNU003S2
+A5148A                                      SFL
+A5148A            @OPTION#       3Y 0O  3  2EDTWRD('  0.')
+A5148A            @ODESC        70A  O  3  7
+     A**************************************************************************
+A5148A          R MNU003C2
+A5148A                                      SFLCTL(MNU003S2)
+A5148A*
+A5148A  59                                  CF03(03 'Initial Menu')
+A5148A                                      CF04(04 'Search')
+A5148A  58                                  CF05(05 'Settings')
+A5148A                                      CF06(06 'Messages')
+A5148A                                      CF07(07 'Jobs')
+A5148A*D5673                                 CF08(08 'Send Message')
+A5148A                                      CF09(09 'Output')
+A5148A*D5673                                 CF10(10 'Password')
+A5148A                                      CF11(11 'Change Co#')
+A5148A  57                                  CF12(12 'Cancel')
+A5148A  65
+A5148AO 55                                  CF15(15 'Edit Menu Data')
+A5148A*
+A5148A                                      SFLSIZ(10)
+A5148A                                      SFLPAG(10)
+A5148A                                      PAGEUP(92)
+A5148A N98                                  PAGEDOWN(90)
+A5148A                                      OVERLAY
+A5148A N91                                  SFLDSP
+A5148A                                      SFLDSPCTL
+A5148A  91                                  SFLCLR
+A5148A  98                                  SFLEND
+A5148A                                      SFLCSRRRN(&S1CSR)
+A5148A            REC#           4S 0H      SFLRCDNBR
+A5148A            S1CSR          5S 0H
+A5673A            @FRMMENU      10   H
+A5148A                                  1  2'Co#'
+A5148A            @CO#           2Y 0O  1  6COLOR(WHT)
+A5148A            @LOCN          3A  O  1  9COLOR(WHT)
+A5148A            @TITLE        58   O  1 13DSPATR(HI)
+A5148A                                  2  2 'MENU:'
+A5148A            @MENU         10   O  2  8
+     A*****************************************************************
+A5148A          R MNU003M2
+A5148A                                      OVERLAY
+A5148A                                 13  2' '
+A5148A                                 14  2'Opt:'
+A5148A            @SLCTOP        3Y 0B 14  7EDTCDE(Z)
+A5148A  51                                  DSPATR(PC)
+A5148A  51                                  DSPATR(RI)
+A5148A                                 14 32'Printer Outque'
+A5148A            @OUTQ         10   B 14 47
+A5148A  59        @F3MSG        13   O 16  2COLOR(BLU)
+A5148A                                 16 17'F4=Search'
+A5148A                                      COLOR(BLU)
+A5148A  58                             16 31'F5=Settings'
+A5148A  58                                  COLOR(BLU)
+A5148A  57        @F12MSG       24   O 17 47COLOR(BLU)
+A5148A  55                             17 73'F15=Edit'
+A5148A                                      COLOR(BLU)
+A5148A                                 16 47'F6=Messages'
+A5148A                                      COLOR(BLU)
+A5148A                                 16 61'F7=Jobs'
+A5148A                                      COLOR(BLU)
+A5148A*D5673                            16 66'F8=Send Message'
+A5148A*D5673                                 COLOR(BLU)
+A5148A                                 17  2'F9=Output'
+A5148A                                      COLOR(BLU)
+A5148A*D5673                            17 17'F10=Password'
+A5148A*D5673                                 COLOR(BLU)
+A5148A                                 17 31'F11=Chg Co/Lcn'
+A5148A                                      COLOR(BLU)
+A5148A                                 21  2' '
+A5148A                                 22  2' '
+A5148A                                 23  2' '
+    
+     A*****************************************************************
+    

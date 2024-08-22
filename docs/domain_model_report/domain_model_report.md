@@ -1,0 +1,170 @@
+Based on the provided code, here is a domain model that covers all entities, attributes, and relationships:
+
+### Entities
+
+1. **DSCOREG (Corporate Company/Region File)**
+   - **Attributes:**
+     - `CRCO#` (Branch Company Number)
+     - `CRREG` (Region)
+     - `CRCNM` (Company Name)
+     - `CRDIV` (Division)
+     - `CRIND` (Company Inception Date)
+     - `CREXD` (Company Expiration Date)
+     - `CRCNTR` (Country)
+     - `CRFL01` (Force Region Flag)
+     - `CRFL02` (On Corporate Machine Flag)
+     - `CRREGO` (Regional Office Flag)
+     - `CR198O` (Default Output Queue)
+     - `CRMID#` (Merchant ID)
+     - `CRLANG` (Language)
+     - `CRDATF` (Date Format to Print)
+     - `CRARTC` (Using AR Traffic Flag)
+     - `CRVERT` (Using Vertex Flag)
+     - `CRVCO` (Vertex Company Code)
+     - `CRSFA` (Sales Force Automation Flag)
+     - `CRAID` (Alternate Item Description Flag)
+     - `CR$CD` (Currency Type Code)
+     - `CRRCY` (Recycling Tax Program Flag)
+     - `CRHAZT` (Hazardous Material Type)
+     - `CRCLIB` (Company Library)
+     - `CRRLIB` (Regional Library)
+     - `CRBLUM` (BOL UOM)
+     - `CRBLWF` (BOL Weight Factor)
+     - `CRRPT` (Reporting Region)
+     - `CRVIPQL` (VIP Quote Load Flag)
+     - `CRIMPF` (Import Flag)
+     - `CRBRID` (Bridgepoint Partner)
+     - `CRACTG` (Corp Accounting Office)
+     - `CRBAPV` (Brainware A/P Vouch)
+     - `CRPBYC` (Paid by Corporate)
+     - `CRCLNT` (PWT Client ID)
+     - `CRFIPT` (Freight Invoices Paid Through)
+     - `CRMRCID` (Merchant ID Pz)
+     - `CRMRCREF` (Merchant Reference)
+     - `CRMRCTKN` (Merchant Token)
+     - `CRMRCJSK` (Js Security Key)
+     - `CRHRR` (High Radius AR Posting)
+     - `CRVRSDT` (Vertex Start Date)
+     - `CRCHPCAR` (Cheapest Carrier)
+     - `CRPNPGRP` (PNP Grouping For Freight)
+     - `CRSDTRAR` (Use Sidetrade for A/R Mgmt)
+     - `CRSRVLIB` (Fedex Server Library)
+     - `CRBCSPOD` (Use BCS for POD Contract Fee)
+     - `CRC2FO` (Use C2FO for Vendor Payments)
+     - `CRORDACK` (Landscape Order Acknowledgement)
+     - `CRCSTSNT` (Cost Sensitive Company)
+     - `CRLYRADJ` (InterCo PO Layer Cost Adj)
+     - `CRIDLR` (Include in Div Locn Rvw)
+
+2. **BUUSERS (Business Users)**
+   - **Attributes:**
+     - `USRNAM` (User Name)
+     - `USRCO#` (Default Company Number)
+     - `USRLCN` (Default Location Code)
+     - `USRLCR` (Default Location for Reports)
+     - `USRCFL` (Restricted to Default Company Flag)
+     - `USRLFL` (Restricted to Default Location Flag)
+     - `USRLFR` (Restricted to Default Report Location Flag)
+     - `USRCST` (Display Vendor Cost Flag)
+     - `USRMCS` (Display Market Cost Flag)
+     - `USRSHL` (Display Shelters Flag)
+     - `USRMNU` (Initial Menu)
+     - `USRAUT` (Restricted to Initial Menu Flag)
+     - `USFIRC` (Restricted to FI Company Flag)
+     - `USRC01` (Restrict Company Number 1)
+     - `USRC02` (Restrict Company Number 2)
+     - `USRC03` (Restrict Company Number 3)
+     - `USRC04` (Restrict Company Number 4)
+     - `USRC05` (Restrict Company Number 5)
+     - `USRC06` (Restrict Company Number 6)
+     - `USRC07` (Restrict Company Number 7)
+     - `USRC08` (Restrict Company Number 8)
+     - `USRC09` (Restrict Company Number 9)
+     - `USRC10` (Restrict Company Number 10)
+     - `USRC11` (Restrict Company Number 11)
+     - `USRC12` (Restrict Company Number 12)
+     - `USRSIT` (Office Site ID)
+     - `USRDFL` (Restricted to Division Flag)
+     - `USRRFL` (Restricted to Region Flag)
+     - `USRRGR` (Region Report Restriction Flag)
+     - `USXCO#` (Company Number)
+
+3. **BZUSERS (Business Users with Default Company)**
+   - **Attributes:**
+     - `BZZNAM` (User ID)
+     - `BZZCO#` (Company Number)
+     - `BZZDFT` (Default Company Flag)
+     - `BZZLCN` (Location)
+     - `BZZLCR` (Location Restricted Flag)
+
+4. **MENUOPT (Menu Options)**
+   - **Attributes:**
+     - `MNUPGM` (Menu Name)
+     - `MNUOPTION` (Option Number)
+     - `MNUTYPE` (Type)
+     - `MNUDESCE` (Option Description English)
+     - `MNUDESCF` (Option Description French)
+     - `MNUDESCS` (Option Description Spanish)
+     - `MNURUNCMD` (Command to Process Option)
+     - `MNUEFFDATE` (Effective Date of Option)
+     - `MNUHIDE` (Hidden Needs Special Auth Flag)
+     - `MNUUPD` (Update Option Flag)
+     - `MNUUSAGE` (Usage Type)
+
+5. **MNUUSR (Menu User Authorization)**
+   - **Attributes:**
+     - `MNAUSER` (User ID)
+     - `MNACHGUSR` (Change User Profile Flag)
+     - `MNAEDTDTA` (Edit/Change Menu Flag)
+     - `MNAPGM` (First Program to Call)
+     - `MNASHAU` (Show Options Not Authorized Flag)
+     - `MNALANG` (Default Language)
+     - `MNAHIDE` (Special Authority to Hidden Flag)
+     - `MNAF11` (Allow F11=Menu Settings Flag)
+     - `MNACO#` (Company Number)
+     - `MNAPOS` (Position)
+
+6. **SCINQUSR (Inquiry User)**
+   - **Attributes:**
+     - `SCIICUS` (Corp User Profile)
+     - `SCIIDUS` (Dev User Profile)
+     - `SCIIACT` (Active User Flag)
+     - `SCIIPGMR` (Programming User Flag)
+
+7. **SCDATA (Menu Authorization Data)**
+   - **Attributes:**
+     - `SCNAME` (User Name)
+     - `SCMENU` (Menu Program Name)
+     - `SCOPT#` (Menu Option Number)
+     - `SCXCO#` (Company Number)
+     - `SCXGRP` (Group Profile)
+     - `SCEXPD` (Expiration Date)
+     - `SCADUS` (User Added)
+     - `SCADDT` (Date Added)
+     - `SCADTM` (Time Added)
+     - `SCCHUS` (User Changed)
+     - `SCCHDT` (Date Changed)
+     - `SCCHTM` (Time Changed)
+     - `SCFROM` (Source Adding Record)
+
+8. **MNUUSG (Menu Option Usage Tracking)**
+   - **Attributes:**
+     - `LOGCO#` (Company Number)
+     - `LOGLOC` (Location)
+     - `LOGNAM` (Menu Name)
+     - `LOGOPT` (Menu Option Selected)
+     - `LOGRPT` (Report Flag)
+     - `LOGUSR` (User Profile)
+     - `LOGDAT` (Date Selected)
+     - `LOGCMD` (Command)
+     - `LOGTIMEST` (Timestamp Added)
+
+### Relationships
+
+1. **BUUSERS** has a **one-to-many** relationship with **DSCOREG** through the `USRCO#` attribute.
+2. **BZUSERS** has a **one-to-many** relationship with **BUUSERS** through the `BZZNAM` attribute.
+3. **MENUOPT** has a **one-to-many** relationship with **MNUUSR** through the `MNUPGM` attribute.
+4. **SCINQUSR** has a **one-to-many** relationship with **SCDATA** through the `SCIICUS` and `SCIIDUS` attributes.
+5. **MNUUSG** has a **one-to-many** relationship with **MENUOPT** through the `LOGNAM` and `LOGOPT` attributes.
+
+This domain model captures the entities, their attributes, and the relationships between them based on the provided code.

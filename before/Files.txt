@@ -1,0 +1,639 @@
+New File - DSCOREG
+
+     A*****************************************************************
+     A**                                                             **
+     A** CORPORATE COMPANY/REGION FILE ( CORPDATA )                  **
+     A**                                                             **
+     A** USER MODIFICATIONS:                                         **
+     A**                                                             **
+     A**                                                             **
+     A** CAL - 01/05/01  - DIST2606 : ADD BEG/END DATE FIELDS        **
+     A** NLM - 02/15/01  - DIST2446-61 ADD COUNTRY AND FORCE FLAG    **
+     A** NLM - 04/09/01  - DIST2673    ADD SALES REPORT OUTQ         **
+     A**                               ADD REGIONAL COMPANY FLAG     **
+     A**                               ADD ON CORPORATE MACHINE FLAG **
+     A** NLM - 06/09/01  - DIST2740-03 ADD MERCHANT ID WITH ABOVE CHANGE
+     A**                   TBA         ADD DATE FORMAT               **
+     A**                   TBA         ADD LANGUAGE FLAG             **
+     A** NLM - 06/21/01  - DIST2757-19 ADD AR TRAFFIC FLAG           **
+     A** NLM - 06/21/01  - DIST2740-20 ADD TELECHECK ID              **
+     A** NLM - 10/22/01  - DIST3090-03 ADD VERTEX FLAG               **
+     A**                               ADD 5 DIGIT COMPANY VERTEX FIELD
+     A** ALK - 02/19/02  - DIST3273    ADD SFA Flag                  **
+     A** ALK - 02/19/02  - DIST326102  ADD Alternate Item Desc Flag  **
+     A** CAL - 02/16/04  - DIST4379    ADD Currency Type Code        **
+     A** ALK - 07/27/04  - DIST4695    Add Recycling tax flag        **
+     A**                               Add Hazardous material        **
+      *                                                              **
+      *  SAK - 05/26/05  - DIST494114  Add Regional Library          **
+      *                                and Company Library felds     **
+      *                                                              **
+      *  CAL - 11/03/05  - DIST540100  Add BOL UOM & WEIGHT FACTOR   **
+      *                                                              **
+      *  CAL - 10/11/07  - DIST675501  Add Reporting Region Field    **
+      *  MKM - 04/07/08  - DIST703901  Add VIP Quote Load flag       **
+      *  DBA - 08/08/08  - DIST719206  Added IMPORT FLAG and         **
+      *                                BRIDGEPOINT TRADING PARTNER   **
+      *  SAK - 04/14/10  - DIST822303  Added Corp Acctg flag         **
+      *  CAL - 05/14/10  - DIST831901  Add Brainware A/P Vouch Flag  **
+      *  CAL - 10/22/10  - DIST845718  Add Paid by Corporate Flag    **
+      *  RDW - 09/28/12  - DIST913601  Add Client ID to file for PWT **
+      *  PA  - 05/30/13  - DIST989601  Add Freight Invs Paid Thru fld**
+      *  DGD - 07/18/16  - DST1067403  Add Credit Card Merchant data **
+      *  CDG - 09/25/17  - DST1098002  Add High Radius A/R flag      **
+      *  ACP - 03/12/20  - DST11624-01 Add Vertex Start Date Field   **
+      *  BLH - 04/01/20  - DST11625    Add cheapest carrier field    **
+      *  KCC - 07/22/20  - DST11706    Add Pick/Pack Grouping Fr Frieght
+      *  KUM - 09/02/20  - DST11789    1. Add two new fields as      **
+      *                                 a. Use Sidetrade for A/R mgmt**
+      *                                 b. Fedex Server Library      **
+      *                                2. Fix label of the field     **
+      *                                   CRPNPGRP(Added in DST11706)**
+      *  ARJ - 11/16/20  - DST11860    Add Use BCS for POD contract  **
+      *                                fees                          **
+      *  SAK - 03/28/22  - DST223302   Add Use C@FO field            **
+      *  JBJ - 06/28/23  - DST12678    Add Landscape Order Acknowle- **
+      *                                dgement field                 **
+      *  JBJ - 07/26/23  - DST1270301  Add Cost Sensitive Company    **
+      *                                field                         **
+      *  DIV - 10/10/23  - DST1266601  Add InterCo PO Layer Cost Adj **
+      *                                field                         **
+      *  CDG - 04/09/24  - DST1294002  Include Company in Divisional **
+      *                                location review               **
+      *  JBJ - 06/06/24 -  DST12972    Add UNIQUE Keyword to make the**
+      *                                file Unique                   **
+     A*****************************************************************
+A2972A                                      UNIQUE
+     A          R DSCOREGR                  TEXT('COMPANY/REGION  ')
+     A            CRCO#          3  0       TEXT('BRANCH CO #')
+     A            CRREG          2          TEXT('REGION')
+     A            CRCNM         35A         TEXT('COMPANY NAME')
+     A            CRDIV          7A         TEXT('DIVISION')
+     A            CRIND          7  0       TEXT('COMPANY INCEPTION DATE')
+     A            CREXD          7  0       TEXT('COMPANY EXPIRATION DATE')
+     A            CRCNTR         2          TEXT('COUNTRY')
+     A            CRFL01         1          TEXT('FORCE REGION')
+     A*                                     Must use region code in chain to
+     A*                                     COCNTRL (code 135)
+     A            CRFL02         1          TEXT('ON CORPORATE MACHINE Y/N')
+     A            CRREGO         1          TEXT('REGIONAL OFFICE Y/N')
+     A            CR198O        10          TEXT('DEFAULT OUTPUT QUEUE')
+     A*                                     Should be 198 compatible
+     A            CRMID#         4  0       TEXT('MERCHANT ID#')
+     A            CRLANG         1          TEXT('LANGUAGE')
+     A*                                     Blank= English
+     A*                                     F    = French
+     A*                                     S    = Spanish
+     A            CRDATF         1          TEXT('DATE FORMAT TO PRINT')
+     A*                                     M = MDY (original default)
+     A*                                     D = DMY (added for Quebec)
+A2757A            CRARTC         1          TEXT('USING AR TRAFFIC ')
+A2740A            CRTID#         8  0       TEXT('TELECHECK ID# ')
+A3090A            CRVERT         1          TEXT('USING VERTEX')
+A3090A            CRVCO          5          TEXT('VERTEX COMPANY CODE')
+A3273A            CRSFA          1A         TEXT('Sales Force Automation Flag +
+A3273A                                           ''Y'' or ''N''')
+A3261A            CRAID          1A         TEXT('Alternate Item Description F+
+A3261A                                      lag     ''Y'' or ''N''')
+A4379A            CR$CD          1A         TEXT('Currency Type Code +
+A4379A                                      '' '' or  ''C'' or ''P''')
+A4379A*                                     ' '  = U.S. Dollars
+A4379A*                                     'C'  = Canadian Dollars
+A4379A*                                     'P'  = Mexican Pesos
+A4695A            CRRCY          1A         TEXT('Recycling tax program?      +
+A4695A                                       ''Y'' or ''N''')
+A4695A            CRHAZT         1A          TEXT('Hazardous material type')
+A4941A            CRCLIB        10          TEXT('Company Library')
+A4941A            CRRLIB        10          TEXT('Regional Library')
+A5401A            CRBLUM         2          TEXT('BOL UOM')
+A5401 *                                     VALUES('KG' 'LB')
+A5401A            CRBLWF         9  7       TEXT('BOL WEIGHT FACTOR')
+A5401 *                                     VALUES('00.4535924' '1.0')
+A6755A            CRRPT          2          TEXT('Reporting Region')
+A7039A            CRVIPQL        1          TEXT('VIP Quote Load Flag')
+A7039A*                                     ' ' = if CRSFA not= Y
+A7039A*                                     'B' = Both,Load Price & Quote
+A7039A*                                     'P' = Price file load
+A7039A*                                     'Q' = Quote file load
+A7039A            CRIMPF         1          TEXT('Import Flag')
+A7039A            CRBRID        10          TEXT('Bridgepoint Partner')
+A8223A            CRACTG         1          TEXT('Corp Accounting Office')
+A8319A            CRBAPV         1          TEXT('Brainware A/P Vouch')
+A8319 *                                     VALUES('Y' 'N')
+A8457A            CRPBYC         1          TEXT('Paid by Corporate')
+A8457 *                                     VALUES('Y' 'N')
+A9136A            CRCLNT        16          TEXT('PWT Client ID')
+A9896A            CRFIPT         4          TEXT('Frt Invoices Paid thru')
+A9896A                                      COLHDG('Frt Invoices' 'Paid thru')
+
+A0674A            CRMRCID       16          TEXT('Merchant Id Pz')
+A0674A            CRMRCREF      30          TEXT('Merchant Reference')
+A0674A            CRMRCTKN      53          TEXT('Merchant Token')
+A0674A            CRMRCJSK      51          TEXT('Js Security Key')
+A098A             CRHRR          1          TEXT('High Radius AR Posting')
+A1624A            CRVRSDT        7  0       TEXT('Vertex Start Date')
+A1624A                                      COLHDG('Vertex Start Date')
+A1625A            CRCHPCAR       1          TEXT('Cheapest Carrier')
+A1625A                                      COLHDG('Cheapest Carrier')
+      *                                     'Y'= yes, 'N' = no
+C1789A            CRPNPGRP       1          TEXT('PNP Grouping For Freight')
+C1789A                                      COLHDG('PNP Group Freight')
+A1706 *                                     'Y'= yes, 'N' = no
+A1789A            CRSDTRAR       1          TEXT('Use Sidetrade for A/R Mgmt')
+A1789A                                      COLHDG('Sidetrade for A/R')
+A1789A*                                     'Y'= yes, 'N' = no
+A1789A            CRSRVLIB      10          TEXT('Fedex Server Library')
+A1789A                                      COLHDG('Fedex Server Library')
+A1860A            CRBCSPOD       1          TEXT('Use BCS for POD contract fee')
+A1860A                                      COLHDG('BCS for POD con fee')
+A1860A*                                     'Y'= yes, 'N' = no
+A1860A            CRC2FO         1          TEXT('Use C2FO for vendor payments')
+A1860A                                      COLHDG('C2FO vendor payemnts')
+A2678A            CRORDACK       1          TEXT('Landscape Order Acknowledgem+
+A2678A                                      ent')
+A2678A                                      COLHDG('Landscape Order Ack')
+A2703A            CRCSTSNT       1          TEXT('Cost Sensitive Company')
+A2703A                                      COLHDG('Cost Sensitive Comp')
+A2666A            CRLYRADJ       1          TEXT('InterCo PO Layer Cost Adj')
+A2666A                                      COLHDG('IntrCo PO LyrCst Adj')
+A2940A            CRIDLR         1          TEXT('Include in Div Locn Rvw')
+A2940A                                      COLHDG('Inc in Div Loc Rvw')
+
+     A          K CRCO#
+     A          K CRREG
+
+
+New File - BUUSERS
+
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: BUUSERS                                                 *
+      *  DATE CREATED: 01/09/02                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: THIS NEW FILE CONTAINS ALL THE INFORMATION FROM         *
+      *                FILES DSUSERS & FIUSERS.                                *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *   NLM 04/09/2003 3873-01 Add division and region restrictions         *
+      *                                                                        *
+      *   SAK   03/22/05 4941-01 Add company number to the file.               *
+      *                          This will be used for single sign-on.         *
+      *                                                                        *
+      **************************************************************************
+     A          R BUUSERSR
+      *
+      * Global user information
+      *
+     A            USRNAM        10          TEXT('USER NAME')
+     A            USRCO#         2          TEXT('DEFAULT COMPANY NUMBER')
+      *
+      * Distribution user information
+      *
+     A            USRLCN         3          TEXT('DEFAULT LOCATION CODE')
+     A            USRLCR         3          TEXT('DEFAULT LOCATION FOR REPORTS')
+     A            USRCFL         1          TEXT('Y=RESTRICTED TO DFT COMPANY')
+     A            USRLFL         1          TEXT('Y=RESTRICTED TO DFT LOCN')
+     A            USRLFR         1          TEXT('Y=RESTRICTED TO DFT RPT LOCN')
+     A            USRCST         1          TEXT('Y=DISPLAY VENDOR COST')
+     A            USRMCS         1          TEXT('Y=DISPLAY MARKET COST')
+     A            USRSHL         1          TEXT('Y=DISPLAY SHELTERS ')
+     A            USRMNU        10          TEXT('INITIAL MENU')
+     A            USRAUT         1          TEXT('R=RESTRICTED TO INIT MENU')
+      *
+      * Financial user information
+      *
+     A            USFIRC         1          TEXT('Y=RESTRICTED TO FI COMPANY')
+     A            USRC01         2A         TEXT('RESTRICT CO NUMBER 1')
+     A            USRC02         2A         TEXT('RESTRICT CO NUMBER 2')
+     A            USRC03         2A         TEXT('RESTRICT CO NUMBER 3')
+     A            USRC04         2A         TEXT('RESTRICT CO NUMBER 4')
+     A            USRC05         2A         TEXT('RESTRICT CO NUMBER 5')
+     A            USRC06         2A         TEXT('RESTRICT CO NUMBER 6')
+     A            USRC07         2A         TEXT('RESTRICT CO NUMBER 7')
+     A            USRC08         2A         TEXT('RESTRICT CO NUMBER 8')
+     A            USRC09         2A         TEXT('RESTRICT CO NUMBER 9')
+     A            USRC10         2A         TEXT('RESTRICT CO NUMBER 10')
+     A            USRC11         2A         TEXT('RESTRICT CO NUMBER 11')
+     A            USRC12         2A         TEXT('RESTRICT CO NUMBER 12')
+     A            USRSIT        10          TEXT('OFFICE SITE ID')
+      *
+A3873A            USRDFL         1          TEXT('Y=RESTRICTED TO DIVISION')
+A3873A                                      DFT('Y')
+A3873A            USRRFL         1          TEXT('Y=RESTRICTED TO REGION')
+A3873A                                      DFT('Y')
+A3873A            USRRGR         1          TEXT('Y=Region Report Restriction')
+A3873A                                      DFT('Y')
+A4941A            USXCO#         2S 0       TEXT('COMPANY NUMBER')
+      *
+      * Key Fields
+      *
+     A          K USRNAM
+
+New Logical File - BUUSERS1 over BUUSERS 
+
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: BUUSERS1                                                *
+      *  DATE CREATED: 03/11/05                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: LOGICAL VIEW OF BUUSERS BY CO# AND USER NAME            *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      *                                                                        *
+      **************************************************************************
+      *
+     A          R BUUSERSR                  PFILE(BUUSERS)
+      *
+     A          K USRCO#
+     A          K USRNAM
+
+New File - BZUSERS
+
+
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: BZUSERS                                                 *
+      *  DATE CREATED: 04/14/05                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: THIS FILE CONTAINS THE USER, COMPANY NUMBER AND         *
+      *                DEFAULT COMPANY.                                        *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      **************************************************************************
+     A          R BZUSERSR
+      *
+     A            BZZNAM        10          TEXT('User ID')
+     A            BZZCO#         2  0       TEXT('Company Number')
+     A            BZZDFT         1          TEXT('Default Company')
+     A            BZZLCN         3          TEXT('Location')
+     A            BZZLCR         1          TEXT('Location Restricted')
+      *
+     A          K BZZNAM
+     A          K BZZCO#
+     A          K BZZDFT
+
+New Logical File - BZUSERS1 over BZUSERS
+
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: BZUSERS21                                               *
+      *  DATE CREATED: 04/14/05                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: BUNZL USERS BY USER AND DEFAULT COMPANY                 *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      **************************************************************************
+     A          R BZUSERSR                  PFILE(BZUSERS)
+      *
+     A          K BZZNAM
+     A          K BZZDFT
+
+New File - MENUOPT
+
+      **************************************************************************
+      *                                                                        *
+      *  DATE CREATED: 12/09/02                                                *
+      *  CREATED BY..: NANCY MCMAHON                                           *
+      *  DESCRIPTION.: BUNZL SYSTEM MENU OPTIONS                               *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *   NLM  10/04/05  DIST5350 Add Critical Menu Access Flag for Update Optio
+      *   DBH  04/07/16 DST10630-01 ADD USAGE TYPE FIELD                       *
+      *                       VALUES OF (R)EPORT,  (I)NQUIRY,  (M)AINTENANCE   *
+      **************************************************************************
+     A                                      UNIQUE
+      *
+     A          R MENUOPTR
+      *
+     A            MNUPGM        10          TEXT('MENU NAME')
+     A            MNUOPTION      3  0       TEXT('OPTION NUMBER')
+     A            MNUTYPE        1          TEXT('TYPE M/C/P')
+      *                                     C= CALL
+      *                                     M= MENU
+     A            MNUDESCE      70          TEXT('OPTION DESCRIPTION ENGLISH')
+     A            MNUDESCF      70          TEXT('OPTION DESCRIPTION FRENCH')
+     A            MNUDESCS      70          TEXT('OPTION DESCRIPTION SPANISH')
+     A            MNURUNCMD     70          TEXT('COMMAND TO PROCESS OPTION')
+     A            MNUEFFDATE      L         TEXT('EFFECTIVE DATE OF OPTION')
+     A            MNUHIDE        1          TEXT('Hidden Needs Special Auth ')
+A5350A            MNUUPD         1          TEXT('Update Option =U')
+A0630A            MNUUSAGE       1          TEXT('Usage Type R/I/M')
+      *
+      * KEY FIELDS
+      *
+     A          K MNUPGM
+     A          K MNUOPTION
+
+New File - MNUUSR
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: MNUUSR                                                  *
+      *  DATE CREATED: 11/01/00                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: THIS FILE WILL BE USED TO DETERMINE IF A USER IS        *
+      *                AUTHORZED TO CHANGE GENERIC ATTENTION KEY MENU DATA     *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *   NLM   12/10/02 DIST3713 USE WITH BUNZL SYSTEM MENU                   *
+      *   NLM   08/30/04 DIST4726 Add Allow F11=Menu Settings               *
+      *                                                                        *
+      *   SAK   05/10/05 4941-12  Add company number to file                   *
+      *   NLM   10/06/05 DIST5350 Add position                                 *
+      *                                                                        *
+      **************************************************************************
+     A                                      UNIQUE
+      *
+     A          R MNUUSRR
+      *
+     A            MNAUSER       10          TEXT('USER I.D.')
+     A            MNACHGUSR      1          TEXT('CHANGE USER PROFILE Y/N')
+     A            MNAEDTDTA      1          TEXT('EDIT/CHANGE MENU Y/N')
+A3713A            MNAPGM        10          TEXT('FIRST PROGRAM TO CALL')
+A3713A            MNASHAU        1          TEXT('Show Options not authorized')
+A3713A            MNALANG        1          TEXT('Default Language')
+      *                                     English, French, Spanish
+     A            MNAHIDE        1          TEXT('Special Authority to hidden')
+A4726A            MNAF11         1          TEXT('Allow F11=Menu Settings')
+A4941A            MNACO#         2          TEXT('Company Number')
+A5350A            MNAPOS         9          TEXT('Position')
+      *                                     verify to file CMAPOSIT
+      *
+      * KEY FIELD
+      *
+     A          K MNAUSER
+A4941A          K MNACO#
+
+New File - MENUOPT
+
+      **************************************************************************
+      *                                                                        *
+      *  DATE CREATED: 12/09/02                                                *
+      *  TASK........: DIST3713                                                *
+      *  CREATED BY..: NANCY MCMAHON                                           *
+      *  DESCRIPTION.: BUNZL SYSTEM MENU OPTIONS                               *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      *  CAL - 08/08/05 - DIST5148-60 : ADD HAND HELD FLAG FIELD               *
+      *                                                                        *
+      *   SAK   06/28/06  5545  Add new flag to designate report menu.         *
+      *                                                                        *
+      **************************************************************************
+     A                                      UNIQUE
+      *
+     A          R MENUHDRR
+      *
+     A            MNHPGM        10          TEXT('Menu Name')
+     A            MNHDSCE       60          TEXT('Menu Description English')
+     A            MNHDSCF       60          TEXT('Menu Description French')
+     A            MNHDSCS       60          TEXT('Menu Description Spanish')
+     A            MNHHIDE        1          TEXT('Need special authority')
+     A            MNHHELD        1          TEXT('Hand Held Menu Y/N')
+     A            MNHRPDP        1          TEXT('Report Or Dependent Menu')
+      *
+      * KEY FIELDS
+      *
+     A          K MNHPGM
+
+New File - SCINQUSR
+     
+      **************************************************************************
+      *                                                                        *
+      *  OBJECT NAME:  SCINQUSR                                                *
+      *  CREATED BY:   Scott Kasting                                           *
+      *  DATE CREATED: 01/02/07                                                *
+      *  DESCRIPTION:  This file will be used to allow users access to         *
+      *                inquiry menu options.                                   *
+      *                                                                        *
+      **************************************************************************
+      *                                                                        *
+      *  MODIFICATIONS:                                                        *
+      *------------------------------------------------------------------------*
+      *  NAME    DATE    DIST#   DESCRIPTION                                   *
+      *  ----  --------  ------  ----------------------------------------------*
+      *                                                                        *
+      **************************************************************************
+      *
+     A          R SCINQUSRR
+      *
+     A            SCIICUS       10           TEXT('Corp User Profile')
+     A            SCIIDUS       10           TEXT('Dev User Profile')
+     A            SCIIACT        1           TEXT('Active User')
+      *                                      A=Active
+      *                                      I=Inactive
+      *                                      D=Schedule for Delete
+     A            SCIIPGMR       1           TEXT('Programming User')
+      *
+      * Key Fields
+      *
+     A          K SCIICUS
+     A          K SCIIACT
+
+New Logical File - SCINQUSR over SCINQUSR
+
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: SCINQUSR1                                               *
+      *  DATE CREATED: 01/02/07                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: Logical over SCINQUSR by Development Profile.           *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      **************************************************************************
+     A          R SCINQUSRR                 PFILE(SCINQUSR)
+      *
+     A          K SCIIDUS
+     A          K SCIIACT
+
+New File - SCDATA
+
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *   SAK   03/22/05 494101 Add Company number and Group Profile fields to *
+      *                         the file.  These are for single sign-on.       *
+      *                                                                        *
+      *   SAK   05/04/15 0399   Add expiration date tothe file.                *
+      *                                                                        *
+      *   DBH   02/15/16 0506   Add user added/changed, time added/changed,    *
+      *                         date added/changed columns.                    *
+      *                                                                        *
+      *   DBH   09-20-16 DST10630-15 Add flag to designate whether data added  *
+      *                              via role-based (value of "R") or          *
+      *                              menu-based security (value of blank).     *
+      *                                                                        *
+      **************************************************************************
+     A          R SCDATAR
+     A            SCNAME        10          TEXT('USER NAME')
+     A            SCMENU        10          TEXT('MENU PROGRAM NAME')
+     A            SCOPT#         3          TEXT('MENU OPTION NUMBER')
+A4941A            SCXCO#         2S 0       TEXT('Company Numer')
+A4941A            SCXGRP         1          TEXT('Group Profile')
+A0399A            SCEXPD         7  0       TEXT('Expiration Date')
+A0506A            SCADUS        10          TEXT('User Added')
+A0506A            SCADDT         7  0       TEXT('Date Added')
+A0506A            SCADTM         6  0       TEXT('Time Added')
+A0506A            SCCHUS        10          TEXT('User Changed')
+A0506A            SCCHDT         7  0       TEXT('Date Changed')
+A0506A            SCCHTM         6  0       TEXT('Time Changed')
+A0630A            SCFROM         1          TEXT('Source Adding Record')
+      *
+     A          K SCNAME
+     A          K SCMENU
+     A          K SCOPT#
+     A          R SCDATA1R                  PFILE(SCDATA)
+     A            S1NAME                    RENAME(SCNAME)
+     A            S1MENU                    RENAME(SCMENU)
+     A            S1OPT#                    RENAME(SCOPT#)
+     A          K SCNAME
+     A          K SCMENU
+     A          K SCOPT#
+
+New Logical File - SCDATA4 Over SCDATA
+
+      **************************************************************************
+      *                                                                        *
+      *  FILE NAME...: SCDATA4                                                 *
+      *  DATE CREATED: 03/22/05                                                *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: MENU AUTHORIZATION FILE BY COMPANY#/USER/MENU/NAME      *
+      *                EXCLUDES GROUP PROFILE RECORDS.                         *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      **************************************************************************
+     A          R SCDATAR                   PFILE(SCDATA)
+      *
+     A          K SCXCO#
+     A          K SCNAME
+     A          K SCMENU
+     A          K SCOPT#
+      *
+     A          S SCXGRP                    COMP(NE 'Y')
+
+New Logical File - MENUOPT1 Over MENUOPT
+
+      **************************************************************************
+      *                                                                        *
+      *  DATE CREATED: 03/17/05                                                *
+      *  DIST........: 5038                                                    *
+      *  CREATED BY..: SCOTT KASTING                                           *
+      *  DESCRIPTION.: MENUOPT file by Run Command, Type, and Option #.        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      *                                                                        *
+      **************************************************************************
+      *
+     A          R MENUOPTR                  PFILE(MENUOPT)
+      *
+     A          K MNURUNCMD
+     A          K MNUTYPE
+     A          K MNUOPTION
+
+New File - MENUJMP
+
+     *****************************************************************
+     *
+     *   CREATED BY..: Nancy McMahon                                 *
+     *   DATE CREATED: 08/16/04                                      *
+     *   PROJECT #...: DIST4726                                      *
+     *   DESCRIPTION.: Personal Settings for menu               *
+     *****************************************************************
+                R MENUJMPR
+                  JMUSER        10             TEXT('User Profile')
+                  JMDATA       120             TEXT('12 * 10 Menu Shortcuts')
+
+                K JMUSER
+
+New File - MNUUSG
+
+      **************************************************************************
+      *                                                                        *
+      *  OBJECT NAME : MNUUSG                                                  *
+      *  DEMAND/TASK : DMND0135289/DST11069                                   *
+      *  DATE CREATED: 19/03/12                                                *
+      *  CREATED BY..: COCCKOTHA                                               *
+      *  DESCRIPTION.: MENU OPTION USAGE TRACKING FILE                         *
+      *                                                                        *
+      **************************************************************************
+      **************************************************************************
+      *   MODIFICATIONS:                                                       *
+      *------------------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                                    *
+      *   ----  -------- ------ -----------------------------------------------*
+      **************************************************************************
+                                            UNIQUE
+                R MNUUSGR
+                  LOGCO#         2S 0       TEXT('COMPANY NUMBER')
+                  LOGLOC         3          TEXT('LOCATION')
+                  LOGNAM        10          TEXT('MENU NAME')
+                  LOGOPT         3  0       TEXT('MENU OPTION SELECTED')
+                  LOGRPT         1          TEXT('REPORT FLAG')
+      *                                      R = REPORT MENU OPTION
+      *                                     *BLANKS = NORMAL MENU OPTION
+                  LOGUSR        10          TEXT('USER PROFILE')
+                  LOGDAT          L         TEXT('DATE SELECTED') DATFMT(*ISO)
+                  LOGCMD        70          TEXT('COMMAND')
+                  LOGTIMEST       Z         TEXT('TIMESTAMP ADDED')
+                K LOGCO#
+                K LOGLOC
+                K LOGNAM
+                K LOGOPT
+                K LOGRPT
+                K LOGUSR
+                K LOGDAT

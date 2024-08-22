@@ -1,0 +1,12 @@
+     *****************************************************************
+     **   prototype for call to error message subfile program       **         ESF
+      * UT0500                                                                  ESF
+     D UT0500          PR                  ExtPgm('UT0500')                     ESF
+     D   P_Act                        1                                         ESF
+     D   P_MsgId                     10                                         ESF
+     D   P_Msg                       75                                         ESF
+     D   P_Prog                      10                                         ESF
+     D Msg_Act         S              1                                         ESF
+     D Msg_Id          S             10                                         ESF
+     D Msg_Data        S             75                                         ESF
+     D Msg_Prog        S             10                                         ESF

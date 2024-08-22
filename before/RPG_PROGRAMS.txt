@@ -1,0 +1,1822 @@
+New MNU003 - Program      
+      *****************************************************************
+      *   MNU003                                                      *
+      *   CREATED BY..: Nancy McMahon                                 *
+      *   DATE CREATED: 12/09/02                                      *
+      *   PROJECT #...: DIST3713                                      *
+      *   DESCRIPTION.: Replacement program for Bunzl menu system     *
+      *                                                               *
+      *****************************************************************
+      *   MODIFICATIONS:                                              *
+      *---------------------------------------------------------------*
+      *   NAME    DATE   DIST#  DESCRIPTION                           *
+      *   ----  -------- ------ -----------------------------------   *
+      *   NLM  03/17/04  4482-02 Standardize, close MNUUSR so that    *
+      *                          maintenance options can be selected
+      *                          hide=* is never show
+      *   NLM  08/16/04  4726    Add user selections F11              *
+      *                          default to show unauthorized='Y'     *
+      *                          change wording on Error for title
+      *                                                               *
+      *   SAK  12/23/04  491601  Change program to load subfile a     *
+      *                          page at a time.  Add logic to display*
+      *                          the report option only if the menu   *
+      *                          ends in '00'.                        *
+      *                                                               *
+      *   SAK  03/04/05  5038    Correct the problem with an invalid  *
+      *                          outque.  Program should only check   *
+      *                          the outque when an option is taken.  *
+      *                          Display the correct message when an  *
+      *                          incorrect outque is entered.         *
+      *                          Change program zero out the selection*
+      *                          when invalid option or security check*
+      *                          fails.  Send message text for error  *
+      *                          via message BZL9898.                 *
+      *                          Change the F3 to no longer be default*
+      *                          menu.  It shall now be the menu that *
+      *                          the option is executed from by the   *
+      *                          new MENUOPT1 file.                   *
+      *                                                               *
+      *   SAK  05/06/05  4941    Allow users to change companies.     *
+      *                                                               *
+      *   CAL  08/10/05  5148-60 If handheld menu option, display on  *
+      *                          cut-down screen                      *
+      *   NLM  10/13/05  5350    Add parm to MNU007
+      *                                                               *
+      *   SAK  02/21/06  5542    Change logic so when going between   *
+      *                          two menus from a menu the F3 text    *
+      *                          does not point back to itself.       *
+      *                                                               *
+      *   RDW  05/11/06  5673    Remove F8=Send Message               *
+      *                                F10=Password from menu screen. *
+      *                          Add logic for new menu 91=General    *
+      *                           Utilities to all screens.           *
+      *                                                               *
+      *   RDW  09/01/06  5673    Add DSJOBM31 #5 Keyes Fax Menu Back  *
+      *                                                               *
+      *   SAK  01/02/07  6196    Add new file SCINQUSR.  This file    *
+      *                          will allow access to all menu        *
+      *                          options that are not update.         *
+      *                                                               *
+      *   SAK  11/14/07  6197    Add logic for new value of 'P' in    *
+      *                          MNUHIDE field of file MENUOPT.       *
+      *                                                               *
+     *   NK   03/16/18  1069    Capture Menu Options Keyed in by User*
+     *                          on daily basis.MNUUSG file will be   *
+     *                          used to capture the details.         *
+     *   KSK  03/02/23  2554    Check User need to GET PIV Q&A screen*
+     *                          or not and if yes, disply PIV Q&A    *
+      *                                                               *
+      *****************************************************************
+     FMNU003FM  CF   E             WORKSTN INDDS(DispInds)
+     F                                     SFILE(MNU003S1:RRR#)
+A5148F                                     SFILE(MNU003S2:RRR#)
+a4482F                                     INFDS(WSDS)
+     FMENUOPT   UF   E           K DISK
+     FMNUUSR    IF   E           K DISK
+     FMENUHDR   IF   E           K DISK
+A6196FSCINQUSR  IF   E           K DISK
+A6196FSCINQUSR1 IF   E           K DISK    Rename(SCINQUSRR:SCINQUR1)
+C4941FSCDATA4   UF A E           K DISK
+A4941F                                     UsrOpn
+A5038FSCDATA1   IF   E           K DISK    Prefix('S1')
+A4941F                                     UsrOpn
+A5673FSCDATA    IF   E           K DISK    Prefix('S0')
+A5673F                                     Rename(SCDATAR:S0DATAR)
+A5673F                                     UsrOpn
+A5038FMENUOPT1  IF   E           K DISK    Prefix('O1')
+A5038F                                     Rename(MENUOPTR:MENUOPR1)
+a4726FMENUJMP   UF   E           K DISK    USROPN
+A1069* Menu option usage tracking file                              **
+A1069FMNUUSG    IF A E           K DISK
+      *****************************************************************
+
+      * ProtoType Copy Books
+
+a4482 /Copy CB_UT0500                                                         PROTOTYPE FOR CALL
+      *
+     D AllAuth         S               N
+A6196D AS400Name       S             10
+A5673D Auth91          S               N
+A5673D AuthGU          S               N
+A5038D AlphaOption     S              3
+     D BeginCenter     S              3  0
+a4482D CharOpt         S              3
+A4941D Co#_Restrict    S              1
+     D Command         S            300
+     D CmdLen          S             15  5
+     D DftProfile      S             10    Inz('*PUBLIC   ')
+     D ErrorFlag       S              1
+A5038D F3Data          S             10
+     D Function        S              6
+D4916 *HldRrn          S              4  0
+A5038D Idx2            S              2  0
+     D Index           S              2  0
+a4482D InFrMenu        S             10
+     D InitProgram     S             10
+     D InOutQ          S             10
+A6196D InqUser         S              1
+a4482D InToMenu        S             10
+a4482D JCnt            S              3  0
+     D Jump            S              2  0
+A5038D KeyCommand      S             70
+A4941D KeyCompany#     S              2  0
+A4916D KeyMenu         S             10
+A5038D KeyMenuName     S             10
+A4916D KeyOpt#         S              3  0
+     D KeyOption       S                   like(SCOPT#)
+     D KeyProgram      S             10
+A5038D KeyType         S              1    Inz('M')
+A4941D Lcn_Restrict    S              1
+A5148D MaxRec          S              2  0
+A6197D PgmUser         S              1
+     D RcdCnt          S              4  0
+     D RcdFnd          S              1
+     D ReturnCode      S              2
+A4916D RptCheck        S              2
+A4916D RptCheck1       S              2
+A5038D RptCommand      S             10
+     D RRR#            S              4  0
+A4941D ProcessChange   S              1
+     D SaveOutQ        S             10
+     D SaveProgram     S             10
+A4916D Scrn            S              4  0
+     D ShowThis        S               N
+D4916 *Text1           S             80
+      *Text2           S             80
+D4916 *Text3           S             80
+     D ThisAuth        S               N
+a4482D U303_PROGRAM    S             10
+a4482D U303_FORMAT     S             10
+     D WorkTitle       S                   like(@TITLE)
+A5673D GENProgram      S             10
+A5673D GenOpt#         S              3  0
+A5673D M1              S              2  0
+A5673D GUMenuName      S             10
+A5673D GUFOUND         S              1
+A5673D GUDEFAULT       S              1
+A1069*
+  |  *            StandAlone Field                              **
+  |  D CalCommand      S             70
+  |  *                  KeyField                           **
+  |  D K@Co#           S              2  0
+  |  D K@Loc           S              3
+  |  D K@Nam           S             10
+  |  D K@Opt           S              3  0
+  |  D K@Usr           S             10
+  |  D K@Dat           S               D    DATFMT(*ISO)
+A1069D K@RptFlg        S              1
+
+      * Data Structures
+
+D4941 *               UDS
+A4941D LDA             DS
+     D  LDAUSRNAME           257    266
+     D  LDACO#               278    279
+     D  LDALCN               280    282
+A4941D  LDACFL                        1
+A4941D  LDALFL                        1
+
+     D                SDS
+     D  UserProfile          254    263
+a4482D @PGMQ             *PROC                                                  ESF
+
+a4482D WSDS            DS
+a4482D  WSFORMAT         *RECORD                                                ESF
+
+     D DATA            DS           120
+     D  JumpMenu                     10    Dim(12)
+
+     D                 DS
+     D WkTime                  1     14  0
+     D  Clock                         6  0 OVERLAY(WkTime : 1)
+     D  CurDate                       8  0 OVERLAY(WkTime : 7)
+
+      * Command Keys available
+
+     DDispInds         DS
+a4482D  F2                     2      2N
+     D  InitialM               3      3N
+     D  F4                     4      4N
+C4941D  F5                     5      5N
+D4941 * ChgUsrPrf              5      5N
+     D  F6                     6      6N
+     D  F7                     7      7N
+D5673D*  F8                     8      8N
+     D  F9                     9      9N
+D5673D*  F10                   10     10N
+a4726D  F11                   11     11N
+     D  Previous              12     12N
+c4482D  F13                   13     13N
+c4482D* J01                   13     13N
+     D  J02                   14     14N
+     D  F15                   15     15N
+     D  J04                   16     16N
+     D  J05                   17     17N
+     D  J06                   18     18N
+     D  J07                   19     19N
+     D  J08                   20     20N
+     D  J09                   21     21N
+     D  J10                   22     22N
+     D  J11                   23     23N
+     D  J12                   24     24N
+
+      * Subfile Indicators
+
+     D   SflRoll              90     90N
+     D   SflClr               91     91N
+     D   SflPgUp              92     92N
+     D   SflEnd               98     98N
+
+      * Error Indicators
+
+     D OptionError            51     51N
+     D NoLDAFound             52     52N
+     D OutQueError            53     53N
+     D DspF5Key               54     54N
+     D DspF15Key              55     55N
+     D DspF12Key              57     57N
+a4726D DspF11Key              58     58N
+a4726D DspF3Key               59     59N
+A4916D ShowRptOpt             60     60N
+A4916D RptOptError            61     61N
+     D
+
+      * Allow Jumping
+
+     D  AllowJump             64     74N   Dim(11)
+
+      * Arrays
+
+     D MenuList        S             10    Dim(9)
+     D PgmAry          S             10    Dim(999)
+     D OptAry          S              3  0 Dim(999)
+
+      ********************************************************************
+
+     C                   DoW       *INLR = *Off
+
+     C     Function      CasEq     'Sfllod'      SFLLOD
+     C     Function      CasEq     'Dsplay'      DSPLAY
+     C     Function      CasEq     'Sflprc'      SFLPRC
+     C     Function      CasEq     'SflNew'      SFLNew
+     C                   EndCs
+
+     C                   EndDO
+
+     C                   Return
+      ********************************************************************
+     C     SFLNEW        BegSr
+      ********************************************************************
+
+A5673C                   ExSR      FindGUAuth
+
+     C                   Eval      OptAry = *Zeros
+     C                   Eval      PgmAry = *Blanks
+     C                   Eval      Scrn = 1
+
+     C                   Eval      SflClr = *On
+A4916C                   Write     MNU003C1
+A5148C                   Write     MNU003C2
+A4916C                   Eval      SflClr = *Off
+
+     C                   Reset                   @MENU
+     C                   Eval      @MENU=KeyProgram
+     C     KeyProgram    Chain     MENUHDR
+     C                   If        %Found (MENUHDR)
+     C                   Eval      @Title= *Blanks
+     C
+     C                   Select
+     C                   When      MNALANG='F'
+     C                   Eval      WorkTitle= MNHDSCF
+     C                   When      MNALANG='S'
+     C                   Eval      WorkTitle= MNHDSCS
+     C                   Other
+     C                   Eval      WorkTitle= MNHDSCE
+     C
+     C                   EndSl
+     C                   Eval(H)   BeginCenter=
+     C                             ((%len(@Title)-%len(%trim(WorkTitle)))/2)
+     C                             +1
+     C                   Eval      %Subst(@Title:BeginCenter)=%trim(WorkTitle)
+     C                   Else
+c4726C*                  Eval      @Title='ERROR'
+c4726C                   Eval      @Title='This menu has not been converted'
+     C                   EndIf
+     C                   Eval      KeyOption='ALL'
+C4941C     AuthKey       Chain(N)  SCDATA4
+C4941C                   If        %Found(SCDATA4)
+     C                   Eval      AllAuth=*On
+     C                   Else
+     C                   Eval      AllAuth=*Off
+     C                   EndIf
+     C                   If        MenuList(%Elem(MenuList)) <> KeyProgram
+a4482C                             and MenuList(%Elem(MenuList))<> *Blanks
+     C                   Eval      @F12MSG='F12=Return to ' +
+     C                                     MenuList(%Elem(MenuList))
+     C                   Eval      DspF12Key= *On
+     C                   Else
+     C                   Eval      DspF12Key= *Off
+     C                   EndIf
+
+A5038C                   ExSr      GETF3DATA
+
+D5038 *a4726C                   Eval      DspF3Key= KeyProgram <> InitProgram
+     C
+D4916 *                   Write     MNU003C1
+D4916 *                   Eval      SflClr = *Off
+     C                   Eval      RRR# = 0
+     C                   Eval      REC# = 0
+     C                   Eval      @SLCTOP = OutOption
+     C                   Eval      OutOption= *Zero
+     C                   Eval      @REPORT = *Blanks
+     C                   Eval      RcdCnt = 0
+
+     C                   Eval      Function = 'Sfllod'
+
+     C                   EndSr
+      ********************************************************************
+A5673C     FindGUAuth    BegSr
+      ********************************************************************
+
+A5673C                   Eval      AuthGU = *Off
+A5673C                   Eval      GUMenuName = 'GUMENU01'
+A5673C     GUData1Key    SetLL     SCDATA
+A5673C     GUData1Key    ReadE     SCDATA
+A5673C                   DoW       not %EOF(SCDATA)
+A5673C                   If        S0SCXCO# = KeyCompany#
+A5673C                   Eval      AuthGU = *On
+A5673C                   EndIf
+A5673C     GUData1Key    ReadE     SCDATA
+A5673C                   EndDo
+
+A5673C                   EndSr
+      ********************************************************************
+     C     SFLLOD        BegSr
+      ********************************************************************
+
+     C                   Eval      SflEnd = *Off
+c4482 *                  Eval      @MSG = *Blanks
+
+A6197C                   If        MNHHIDE = 'P'
+  |  C                             And PgmUser = *On
+  |  C                   Eval      AllAuth = *On
+  |  C                   Else
+  |  C                   Eval      AllAuth = *Off
+A6197C                   EndIf
+A4916
+  |  C                   Select
+  |  C                   When      SflRoll = *On
+  |  C                   If        Not %EOF(MENUOPT)
+  |  C     OptionKey     SetLL     MENUOPT
+  |  C     OptionKey     ReadE(N)  MENUOPT
+  |  C                   EndIf
+  |
+  |  C                   When      SflPgUp = *On
+  |  C                   Eval      KeyMenu = PgmAry(Scrn)
+  |  C                   Eval      KeyOpt# = OptAry(Scrn)
+  |  C     OptionKey     SetLL     MENUOPT
+  |  C     OptionKey     ReadE(N)  MENUOPT
+  |
+  |  C                   Other
+  |  C     KeyProgram    SetLL     MENUOPT
+  |  C     KeyProgram    ReadE(N)  MENUOPT
+  |
+A4916C                   EndSl
+
+A5148C                   If        MNHHELD <> 'Y'
+A5148C                   Eval      MaxRec = 14
+A5148C                   Else
+A5148C                   Eval      MaxRec = 9
+A5148C                   EndIf
+A4916C                   DoW       Not %EOF(MENUOPT)
+A4916 * D5148                      And RcdCnt <= 14
+A5148C                             And RcdCnt <= MaxRec
+A6196
+  |   * If user in inquiry file and menu option in not an
+  |   * 'N' then grant authority.
+  |
+A6196C                   If        MNUUPD = 'N'
+A6197C                             And MNUHIDE <> 'P'
+A6196C                             And InqUser = *On
+  |  C                   Eval      ThisAuth = *On
+  |  C                   Else
+A6196
+     C                   If        AllAuth = *On
+     C                   Eval      ThisAuth = *On
+     C                   Else
+     C                   Move      MNUOPTION     KeyOption
+     C                   Exsr      CheckAuth
+     C                   EndIf
+A6196
+  |  C                   EndIf
+A6196
+      *  if menuopt = 999, then do not show on screen.
+A5673C                   If        MNUOPTION = 999
+A5673C                   Eval      ShowThis= *Off
+A5673C                   Else
+
+     C                   Select
+a4482C                   When      MNUHIDE='*'
+a4482C                   Eval      ShowThis=*Off
+A6197C
+  |  C                   When      MNUHIDE='P'
+  |  C                             and PgmUser = *Off
+  |  C                   Eval      ShowThis=*Off
+  |  C
+  |  C
+  |  C                   When      MNUHIDE='P'
+  |  C                             and PgmUser = *On
+  |  C                   Eval      ShowThis = *On
+  |  C                   Eval      ThisAuth = *On
+A6197C
+a4482C                   When      MNUHIDE<>'N'
+a4482C                             and MNAHIDE<>'Y'
+     C                   Eval      ShowThis=*Off
+     C
+     C                   When      ThisAuth=*On
+     C                   Eval      ShowThis= *On
+     C
+     C                   When      MNASHAU='Y' and ThisAuth=*Off
+     C                   Eval      MNUDESCE='** '+%trim(MNUDESCE)
+     C                   Eval      MNUDESCF='** '+%trim(MNUDESCF)
+     C                   Eval      MNUDESCS='** '+%trim(MNUDESCS)
+      *                  Eval      @MSG ='**=Not authorized'
+     C                   Eval      ShowThis= *On
+     C
+     C                   Other
+     C                   Eval      ShowThis= *Off
+     C                   EndSl
+
+A5673C                   EndIf
+
+     C                   If        ShowThis
+     C                   Eval      @OPTION# = MNUOPTION
+     C
+     C                   Select
+     C                   When      MNALANG='F'
+     C                   Eval      @ODESC   = MNUDESCF
+     C                   When      MNALANG='S'
+     C                   Eval      @ODESC   = MNUDESCS
+     C                   Other
+     C                   Eval      @ODESC   = MNUDESCE
+     C                   EndSl
+
+     C                   Eval      RcdCnt = RcdCnt + 1
+     C                   Eval      RRR# = RRR# + 1
+     C
+
+     C                   If        RcdCnt = 1
+     C                   Eval      OptAry(Scrn) = MNUOPTION
+     C                   Eval      PgmAry(Scrn) = MNUPGM
+     C                   Endif
+
+     C                   If        RcdCnt = 1
+a4482C                             or @OPTION# = @SLCTOP
+     C                   Eval      REC# = RRR#
+     C                   Endif
+
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Write     MNU003S1
+A5148C                   Else
+A5148C                   Write     MNU003S2
+A5148C                   EndIf
+
+     C                   Endif
+
+     C     KeyProgram    ReadE(N)  MENUOPT
+     C                   EndDo
+
+     C                   If        %EOF(MENUOPT)
+      * D5148                      And RcdCnt <= 14
+A5148C                             And RcdCnt <= MaxRec
+     C                   Eval      @OPTION# = 90
+
+     C                   Select
+     C                   When      MNALANG ='F'
+     C                   Eval      @ODESC = 'Déconnexion'
+     C                   When      MNALANG ='S'
+     C                   Eval      @ODESC = 'Salir'
+     C                   Other
+     C                   Eval      @ODESC = 'Signoff'
+     C                   EndSl
+
+     C                   Eval      RcdCnt = RcdCnt + 1
+     C                   Eval      RRR# = RRR# + 1
+     C                   Eval      REC# = REC# + 1
+     C                   Eval      SflEnd   = *On
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Write     MNU003S1
+A5148C                   Else
+A5148C                   Write     MNU003S2
+A5148C                   EndIf
+     C                   Else
+     C                   Eval      KeyMenu = MNUPGM
+     C                   Eval      KeyOpt# = MNUOPTION
+     C                   EndIf
+
+A5673C                   If        %EOF(MENUOPT)
+A5673C                             And RcdCnt <= MaxRec
+A5673C                             And @MENU <> 'GUMENU01'
+A5673C                             And AuthGU = *On
+A5673C                   Eval      @OPTION# = 91
+
+A5673C                   Select
+A5673C                   When      MNALANG ='F'
+A5673C                   Eval      @ODESC = 'Menu D''''Utilités Général'
+A5673C                   When      MNALANG ='S'
+A5673C                   Eval      @ODESC = 'Menú De Utilidades General'
+A5673C                   Other
+A5673C                   Eval      @ODESC = 'General Utilities Menu'
+A5673C                   EndSl
+
+A5673C                   Eval      RcdCnt = RcdCnt + 1
+A5673C                   Eval      RRR# = RRR# + 1
+A5673C                   Eval      REC# = REC# + 1
+A5673C                   Eval      SflEnd   = *On
+A5673C                   If        MNHHELD <> 'Y'
+A5673C                   Write     MNU003S1
+A5673C                   Else
+A5673C                   Write     MNU003S2
+A5673C                   EndIf
+A5673C                   Else
+A5673C                   Eval      KeyMenu = MNUPGM
+A5673C                   Eval      KeyOpt# = MNUOPTION
+A5673C                   EndIf
+
+     C                   Eval      Function = 'Dsplay'
+
+     C                   EndSr
+      ********************************************************************
+     C     DSPLAY        BegSr
+      ********************************************************************
+
+A5148C     ReDsply       Tag
+A1069*   ************  Clear Key Variable used for MNUNAME **********
+A1069C                   Clear                   K@Nam
+
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Write     MNU003M1
+     C                   Write     MNU003CM                                      error message
+     C                   Exfmt     MNU003C1
+A5148C                   Else
+A5148C                   Write     MNU003M2
+A5148C                   Write     MNU003CM                                      error message
+A5148C                   Exfmt     MNU003C2
+A5148C                   EndIf
+A1069 *
+  |  *   ************  Clear Key Variable used for MNUNAME **********
+A1069C                   Eval      K@Nam = MNUPGM
+
+A5148C                   If        *INKL = *On and OutQueError = *On
+A5148C                   Goto      ReDsply
+A5148C                   EndIf
+
+     C                   ExSr      REMOVEMSG                                    clear error message
+
+c4482C*                  Eval      @MSG = *Blanks
+     C                   Eval      OptionError = *Off
+A5083C                   Eval      OutQueError= *Off
+
+     C                   Select
+
+     C                   When      SflRoll = *On
+     C                   Eval      Function = 'Sfllod'
+
+     C                   Eval      SflClr = *On
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Write     MNU003C1
+A5148C                   Else
+A5148C                   Write     MNU003C2
+A5148C                   EndIf
+     C                   Eval      SflClr = *Off
+     C                   Eval      RRR# = 0
+     C                   Eval      REC# = 0
+     C                   Eval      Rcdcnt = 0
+     C                   Eval      Scrn = Scrn + 1
+
+     C                   When      SflPgUp = *On
+     C                   Eval      Function = 'Sfllod'
+
+     C                   Eval      SflClr = *On
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Write     MNU003C1
+A5148C                   Else
+A5148C                   Write     MNU003C2
+A5148C                   EndIf
+     C                   Eval      SflClr = *Off
+     C                   Eval      RRR# = 0
+     C                   Eval      REC# = 0
+     C                   Eval      Rcdcnt = 0
+     C                   If        Scrn > 1
+     C                   Eval      Scrn = Scrn - 1
+     C                   EndIf
+
+     C                   When      InitialM = *On
+a4482C                   If        InFrMenu=*Blanks
+     C                   Exsr      AddToList
+D5083 *                  Eval      KeyProgram=InitProgram
+A5083C                   Eval      KeyProgram=KeyMenuName
+     C                   Eval      Function = 'SflNew'
+a4482C                   Else
+a4482C                   Eval      *INLR = *On
+a4482C                   EndIf
+
+a4482C                   When      F2= *On
+a4482C                   If        S1CSR >0
+A5148C                   If        MNHHELD <> 'Y'
+a4482C     S1CSR         Chain     MNU003S1
+A5148C                   Else
+A5148C     S1CSR         Chain     MNU003S2
+A5148C                   EndIf
+a4482C                   Eval      @SLCTOP=@OPTION#
+a4482C                   Eval      Function = 'Sflprc'
+a4482C                   EndIf
+
+     C                   When      Previous= *On
+     C                   Eval      KeyProgram= MenuList(%Elem(MenuList))
+     C                   Exsr      SubFromList
+     C                   Eval      Function = 'SflNew'
+
+A4916C                   Exsr      CHECK4RPT
+
+     C                   When      F15 = *On and DspF15Key
+     C                   Close(E)  MENUOPT
+     C                   Call      'MNU004'
+     C                   Parm      KeyProgram    InMenu           10
+     C                   Parm                    ReturnCode
+     C                   Open(E)   MENUOPT
+
+D4916 *                  If        ReturnCode = '03'
+  |   *                  Eval      *INLR = *On
+D4916 *                  Else
+     C                   Eval      Function = 'SflNew'
+D4916 *                  EndIf
+
+     C                   When      F4
+     C                   CALL      'MNU007'
+     C                   Parm      MNALANG       InLang            1
+a5350C                   Parm      *Blanks       InCMA             1
+     C                   Parm                    OutMenu          10
+     C                   PARM                    OutOption         3 0
+     C                   If        Outmenu <> *Blanks
+     C                   Exsr      AddToList
+     C                   Eval      KeyProgram= OutMenu
+     C                   Exsr      CHECK4RPT
+     C                   Eval      Function = 'SflNew'
+     C                   EndIf
+
+D4941 *                  When      F11
+C4941C                   When      F5
+a4726C                   CALL      'MNU010'
+a4726C                   Parm                    UserProfile
+a4726C                   Exsr      SetJump
+a4726C                   Open      MNUUSR
+C4941C     MnuusrKey     Chain     MNUUSR
+a4726C*                  Eval      DspF11Key=MNAF11='Y'
+a4726C                   Close     MNUUSR
+a4726C                   Eval      Function = 'SflNew'
+
+D5673C*                   When      F6 or F7 or F8 or F9 or F10
+A5673C                   When      F6 or F7 or F9
+     C                   CALL      'MNU006CL'
+     C                   Parm                    F6
+     C                   Parm                    F7
+D5673C*                   Parm                    F8
+     C                   Parm                    F9
+D5673C*                   Parm                    F10
+
+A4941C                   When      F11
+  |
+  |  C                   Close     SCDATA4
+  |  C                   Close     SCDATA1
+A5673C                   Close     SCDATA
+  |
+  |  C                   Call      'UT5000CL'
+  |  C                   Parm                    Co#_Restrict
+  |  C                   Parm                    Lcn_Restrict
+  |  C                   Parm                    ProcessChange
+  |
+  |  C                   If        ProcessChange = *Off
+  |
+  |  C                   ExSr      GETLDA
+  |
+  |  C                   Open      SCDATA4
+  |  C                   Open      SCDATA1
+A5673C                   Open      SCDATA
+  |  C                   Eval      Function = 'SflNew'
+  |
+  |  C                   If        LDACO# <> *Blanks
+  |  C                   Move      LDACO#        @CO#
+  |  C                   Move      LDACO#        KeyCompany#
+  |  C                   Eval      @LOCN = LDALCN
+  |  C                   Eval      NoLDAFound = *Off
+  |  C                   Else
+  |  C                   Eval      NoLDAFound = *On
+  |  C                   Eval      KeyCompany# = *Zeros
+  |  C                   EndIf
+  |
+  |  C                   Open      MNUUSR
+  |  C     MnuusrKey     Chain     MNUUSR
+  |  C                   If        %Found(MNUUSR)
+  |
+  |  C                   If        MNAPGM = *Blanks
+  |  C                   Eval      MNAPGM='MASTERMENU'
+  |  C                   EndIf
+  |
+  |  C                   If        MNASHAU = *Blanks
+  |  C                   Eval      MNASHAU='N'
+  |  C                   EndIf
+  |
+  |  C                   If        MNAHIDE = *Blanks
+  |  C                   Eval      MNAHIDE = 'N'
+  |  C                   EndIf
+  |
+  |  C                   If        MNAF11 = *Blanks
+  |  C                   Eval      MNAF11 = 'Y'
+  |  C                   EndIf
+  |
+  |  C                   If        MNALANG <>'E' and
+  |  C                             MNALANG <>'F' and
+  |  C                             MNALANG <>'S'
+  |  C                   Eval      MNALANG='E'
+  |  C                   EndIf
+  |
+  |  C                   Else
+  |
+  |   * Default program
+  |
+  |  C                   Eval      MNAPGM='MASTERMENU'
+  |  C                   Eval      MNASHAU='N'
+  |  C                   Eval      MNAHIDE='N'
+  |  C                   Eval      MNAF11 ='N'
+  |  C                   Eval      MNALANG='E'
+  |  C                   Eval      DspF5Key = *Off
+  |  C                   Eval      DspF15Key = *Off
+  |  C                   EndIf
+  |
+  |  C                   Eval      DspF11Key = MNAF11    = 'Y'
+  |  C                   Eval      DspF5Key  = MNACHGUSR = 'Y'
+  |  C                   Eval      DspF15Key = MNAEDTDTA = 'Y'
+  |
+  |  C                   Close     MNUUSR
+  |
+  |  C                   Eval      KeyProgram=MNAPGM
+  |
+  |  C                   Eval      SflClr = *On
+  |  C                   Write     MNU003C1
+  |  C                   Eval      SflClr = *Off
+  |  C                   Eval      RRR# = 0
+  |  C                   Eval      REC# = 0
+  |  C                   Eval      Rcdcnt = 0
+  |  C                   If        InFrMenu= *Blanks
+  |  C
+  |  C                   Eval      InitProgram=MNAPGM
+  |  C                   For       Index= 1 to %Elem(MenuList)
+D5360C*                   Eval      MenuList(Index)=InitProgram
+A5360C                   Eval      MenuList(Index)='DSJOBM00'
+  |  C                   EndFor
+  |  C
+  |  C                   Else
+  |  C                   Eval      InitProgram=InFrMenu
+  |  C                   EndIf
+  |  C                   Eval      @F3MSG='F3=' + InitProgram
+  |  C                   Exsr      SetJump
+  |
+  |  C                   Exsr      CHECK4RPT
+  |
+  |  C                   Else
+  |  C                   Open      SCDATA4
+  |  C                   Open      SCDATA1
+A5673C                   Open      SCDATA
+  |
+  |  C                   EndIf
+A4941
+
+a4482C                   When      F13
+a4482C                   Exsr      HelpScreen
+     C
+c4482C*                  When      J01 or J02 or F15 or J04 or J05 or J06 or
+c4482C                   When      J02 or F15 or J04 or J05 or J06 or
+     C                             J07 or J08 or J09 or J10 or J11 or J12
+     C                   Exsr      ProcessJump
+     C
+     C                   Other
+     C                   Eval      Function = 'Sflprc'
+
+     C                   EndSl
+
+     C                   EndSr
+      ********************************************************************
+     C     ProcessJump   BegSr
+      ********************************************************************
+
+     C                   Select
+d4482C*                  When         J01
+c4482C*                  Eval      Jump=1
+     C                   When         J02
+     C                   Eval      Jump=2
+     C                   When         F15
+     C                   Eval      Jump=3
+     C                   When         J04
+     C                   Eval      Jump=4
+     C                   When         J05
+     C                   Eval      Jump=5
+     C                   When         J06
+     C                   Eval      Jump=6
+     C                   When         J07
+     C                   Eval      Jump=7
+     C                   When         J08
+     C                   Eval      Jump=8
+     C                   When         J09
+     C                   Eval      Jump=9
+     C                   When         J10
+     C                   Eval      Jump=10
+     C                   When         J11
+     C                   Eval      Jump=11
+     C                   When         J12
+     C                   Eval      Jump=12
+     C                   EndSl
+
+     C                   Exsr      AddToList
+     C                   Eval      KeyProgram= JumpMenu(Jump)
+     C                   Eval      Function = 'SflNew'
+
+     C                   EndSr
+      ********************************************************************
+     C     ChangeOutQ    BegSr
+      ********************************************************************
+
+     C                   Eval      OutQueError= *Off
+A5148C                   If        @OUTQ = *Blanks
+A5148C                   If        SAVEOUTQ <> *Blanks
+A5148C                   Eval      @OUTQ = SAVEOUTQ
+A5148C                   Else
+A5148C                   If        INOUTQ <> *Blanks
+A5148C                   Eval      @OUTQ = INOUTQ
+A5148C                   EndIf
+A5148C                   EndIf
+A5148C                   EndIf
+     C                   Eval      Command = 'CHKOBJ ' +%trim(@OUTQ) + ' *OUTQ'
+     C                   Eval      CmdLen= %len(%trimr(Command))
+     C                   Call(E)   'QCMDEXC'
+     C                   Parm                    Command
+     C                   Parm                    CmdLen
+
+     C                   If        %Error
+A5083C                   ExSr      REMOVEMSG                                    clear error message
+a4482C                   Eval      Msg_ID   = 'BZL0052'
+a4482C                   ExSR      WriteMsg
+d4482C*                  Eval      @MSG = 'Invalid Output Queue'
+     C                   Eval      OutQueError = *On
+     C                   Eval      Function = 'Dsplay'
+
+     C                   Else
+
+A5083C                   Eval      SaveOutq= @OUTQ
+
+     C                   Eval      Command = 'CHGJOB OUTQ(*LIBL/' + @OUTQ + ')'
+     C                   Eval      CmdLen= %len(%trimr(Command))
+     C                   Call(E)   'QCMDEXC'
+     C                   Parm                    Command
+     C                   Parm                    CmdLen
+     C                   EndIf
+
+D5083 *                  Eval      SaveOutq= @OUTQ
+     C
+     C                   EndSr
+      ********************************************************************
+     C     Sflprc        BegSr
+      ********************************************************************
+a4482C                   If        F2 = *Off
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Read      MNU003M1
+A5148C                   Else
+A5148C                   Read      MNU003M2
+A5148C                   EndIf
+a4482C                   EndIf
+
+     C                   If        @OUTQ= *Blanks
+     C                   Eval      @OUTQ= InOutQ
+     C                   EndIf
+     C
+     C                   If        @OUTQ <> SaveOutQ
+     C                             and @SLCTOP <> 90
+     C                   Exsr      ChangeOutQ
+     C                   EndIf
+
+     C                   If        @SLCTOP = *Zeros
+A5673C                             or @SLCTOP = 91
+A5673C                             and @MENU = 'GUMENU01'
+A5673C                   Eval      @SLCTOP = *ZERO
+     C                   Eval      Function = 'Dsplay'
+     C                   Else
+
+     C                   If        Not OutqueError
+
+     C                   If        @SLCTOP=90
+     C                   Eval      MNUTYPE='C'
+     C                   Eval      MNURUNCMD='SIGNOFF'
+A4916C                   Eval      Command = MNURUNCMD
+  |
+  |  C                   Eval      CmdLen=%len(%trimr(Command))
+  |  C                   Call(E)   'QCMDEXC'
+  |  C                   Parm                    Command
+A4916C                   Parm                    CmdLen
+
+     C                   Else
+
+A5673C                   If        @SLCTOP=91
+A5673C                   Eval      GENProgram = 'GUMENU01'
+A5673C                   Eval      GenOpt# = 999
+A5673C     GenKEY        Chain(N)  MENUOPT
+A5673C                   Eval      Auth91 = *On
+A5673C                   Else
+     C     MNUKEY        Chain(N)  MENUOPT
+A5673C                   Eval      Auth91 = *Off
+A5673C                   EndIf
+     C                   EndIf
+     C
+     C                   If        %Found(MENUOPT)
+
+A6197C                   If        @SLCTOP = 89
+  |  C                             And PgmUser = *Off
+  |  C                             And KeyProgram = 'MASTERMENU'
+  |  C                   Eval      AlphaOption = %EDITC(@SLCTOP:'Z')
+  |  C                   Eval      Msg_Data = 'Option ' +%Trim(AlphaOption)+ ' +
+  |  C                             is not valid.'
+  |  C                   Eval      Msg_ID   = 'BZL9898'
+  |  C                   ExSR      WriteMsg
+  |  C                   Eval      Msg_Data = *Blanks
+  |  C                   Eval      @SLCTOP = *Zeros
+  |  C                   Eval      Function = 'Dsplay'
+  |  C                   Else
+A6197
+A6196C                   If        MNUUPD = 'N'
+  |  C                             And InqUser = *On
+  |  C                   Eval      ThisAuth = *On
+  |  C                   Else
+A6196
+     C                   Move      @SLCTOP       KeyOption
+     C                   Exsr      CheckAuth
+A6196
+  |  C                   EndIf
+A6196
+     C                   If        ThisAuth = *On
+A5673C                             or Auth91 = *On
+A5673C                             and AuthGU = *On
+     C
+     C                   If        MNUTYPE='C'
+a4482C                             or MNUTYPE='P'                               2 parameter type
+A1069* Write the record in MNUUSG for Option which Calls a program  **
+  |  C                   Clear                   CalCommand
+  |  C                   Eval      CalCommand = MNURUNCMD
+  |  C                   ExSr      $WrtMNUUSG
+A1069*                                                              **
+     C                   Eval      Command = MNURUNCMD
+
+a4482C                   If        MNUTYPE='P'                                  2 parameter type
+a4482C                   Move      @SLCTOP       CharOpt
+a4482C                   Eval      Command=%Trim(Command)+
+a4482C                             ' PARM('''+KeyProgram+''' '''+CharOpt+''')'
+a4482C                   EndIf
+     C                   Eval      CmdLen=%len(%trimr(Command))
+     C                   Call(E)   'QCMDEXC'
+     C                   Parm                    Command
+     C                   Parm                    CmdLen
+
+     C                   If        %Error
+c4482C*                  Eval      @MSG = Text3
+a4482C                   Eval      Msg_ID   = 'BZL0222'
+a4482C                   ExSR      WriteMsg
+     C                   Eval      OptionError = *On
+     C                   Else
+     C                   Eval      @SLCTOP = *Zeros
+A4916
+  |  C                   Eval      Command = 'RCLRSC'
+  |  C                   Eval      CmdLen=%len(%trimr(Command))
+  |  C                   Call(E)   'QCMDEXC'
+  |  C                   Parm                    Command
+  |  C                   Parm                    CmdLen
+  |
+  |  C                   If        %Error
+  |  C                   EndIf
+A4916
+     C                   EndIf
+
+     C                   Eval      Function = 'Dsplay'
+
+     C                   Else                                                   type=M
+A5542C                   If        MNURUNCMD = MENULIST(9)
+  |  C                   Exsr      SubFromList
+A5542C                   Else
+     C                   Exsr      AddToList
+A5542C                   EndIf
+
+     C                   Eval      KeyProgram= MNURUNCMD
+A4916
+  |  C                   Exsr      CHECK4RPT
+A4916
+     C                   If        @REPORT<>*Blanks
+C4916C                   Eval      KeyProgram= %Trim(Keyprogram) + 'R'
+A1069C                   Eval      K@RptFlg = 'R'
+     C                   EndIf
+
+A1069* Write the record in MNUUSG for Option which Calls a Menu     **
+  |  C                   Clear                   CalCommand
+  |  C                   Eval      CalCommand = KeyProgram
+  |  C                   ExSr      $WrtMNUUSG
+A1069*                                                              **
+     C                   Eval      Function = 'SflNew'
+     C                   EndIf
+
+     C                   Else
+     C                   Eval      OptionError = *On
+d4482C*                  Eval      @MSG = 'Not Authorized to this option'
+a4482C*                  Eval      Msg_ID   = 'BZL0223'
+     C*                  Eval      Msg_ID   = 'BZL0012'
+a4482C                   ExSR      WriteMsg
+     C                   Eval      Function = 'Dsplay'
+     C                   EndIf
+
+A6197C                   EndIf
+
+     C                   Else                                                   not found
+
+     C                   Eval      OptionError = *On
+d4482C*                  Eval      @MSG = Text1
+D5038 *a4482C                   Eval      Msg_ID   = 'BZL0012'
+A5038C                   Eval      AlphaOption = %EDITC(@SLCTOP:'Z')
+  |  C                   Eval      Msg_Data = 'Option ' +%Trim(AlphaOption)+ ' +
+  |  C                             is not valid.'
+A5038C                   Eval      Msg_ID   = 'BZL9898'
+a4482C                   ExSR      WriteMsg
+A5038C                   Eval      Msg_Data = *Blanks
+A5038C                   Eval      @SLCTOP = *Zeros
+     C                   Eval      Function = 'Dsplay'
+     C                   EndIf
+
+     C                   EndIf                                                  outque error
+
+     C                   EndIf                                                  Option = 0
+
+     C                   EndSr
+A1069*********************************************************************
+  |  *  $WrtMNUUSG subroutine to write the record for the keyed in option
+  |  *********************************************************************
+  |   /Free
+  |      BegSr $WrtMNUUSG ;
+  |
+  |  ********  Initilaize the Key fields Variables *****************
+  |         K@Co#  = %Int(LDACO#);
+  |         K@Loc  = LDALCN;
+  |         K@Opt  = @SLCTOP;
+  |         K@Usr  = UserProfile;
+  |         K@Dat  = %Date();
+  |
+  |  **********  Check if the record exists in the file *****
+  |      Chain(N) (K@Co# :K@Loc :K@Nam :K@Opt :K@RptFlg :K@Usr :K@Dat) MNUUSG  ;
+  |         If Not %Found(MNUUSG );
+  |                 LOGCO#     = K@Co#;
+  |                 LOGLOC     = K@Loc;
+  |                 LOGNAM     = K@Nam;
+  |                 LOGOPT     = K@Opt;
+  |                 LOGUSR     = K@Usr;
+  |                 LOGDAT     = K@Dat;
+  |                 LOGRPT     = K@RptFlg;
+  |                 LOGCMD     = CalCommand;
+  |                 LOGTIMEST  = %TimeStamp();
+  |                 Write MNUUSGR  ;
+  |         EndIf ;
+  |
+  |  **********  Clear Key fields *****************************
+  |         Clear  K@Co# ;
+  |         Clear  K@Loc ;
+  |         Clear  K@Nam ;
+  |         Clear  K@Opt ;
+  |         Clear  K@Usr ;
+  |         Clear  K@Dat ;
+  |         Clear  K@RptFlg;
+  |  **********  Clear StandAlone Variable   *****************************
+  |         Clear  CalCommand;
+  |
+  |      EndSr;
+  |   /End-Free
+A1069*****************************************************************
+      ********************************************************************
+     C     CheckAuth     BegSr
+      ********************************************************************
+
+     C                   If        MNUHIDE<>'N'
+     C                             and MNAHIDE<>'Y'
+     C                   Eval      ThisAuth= *Off
+D5038 *                  Eval      Msg_ID   = 'BZL0012'
+A5038C                   Eval      AlphaOption = %EDITC(@SLCTOP:'Z')
+  |  C                   Eval      Msg_Data = 'Option ' +%Trim(AlphaOption)+ ' +
+  |  C                             is not valid.'
+A5038C                   Eval      Msg_ID   = 'BZL9898'
+     C                   Else
+D4941 *    AuthKey       Chain     SCDATA
+C4941C     AuthKey       Chain(N)  SCDATA4
+C4941C                   If        %Found(SCDATA4) or AllAuth= *On
+     C                   Eval      ThisAuth=*On
+     C                   Else
+     C                   Eval      ThisAuth=*Off
+D5038 *                  Eval      Msg_ID   = 'BZL0223'
+A5038C                   Eval      AlphaOption = %EDITC(@SLCTOP:'Z')
+  |  C                   Eval      Msg_Data = 'Security check failed for ' +
+  |  C                             'option ' + %Trim(AlphaOption)
+  |  C                   Eval      Msg_ID   = 'BZL9898'
+A5038C                   Eval      @SLCTOP = *Zeros
+     C                   EndIf
+     C                   EndIf
+      *
+     C                   EndSr
+      ********************************************************************
+     C     AddToList     BegSr
+      ********************************************************************
+D5360C*                   For       Index= 1 to %Elem(MenuList)-1
+A5360C                   For       Index= 2 to %Elem(MenuList)-1
+     C                   Eval      MenuList(Index)= MenuList(Index+1)
+     C                   EndFor
+
+     C                   Eval      MenuList(%Elem(MenuList))=KeyProgram
+
+     C                   EndSr
+      ********************************************************************
+     C     SubFromList   BegSr
+      ********************************************************************
+
+     C                   For       Index= %Elem(MenuList) downto 2
+     C                   Eval      MenuList(Index)= MenuList(Index-1)
+     C                   EndFor
+     C                   Eval      MenuList(1)=MenuList(2)
+
+     C                   EndSr
+      ********************************************************************
+     C     WRITEMSG      BegSr                                                  ESF
+      ********************************************************************
+     **   sub routine to write error message to error message subfile  **      ESF
+
+A5038C                   If        MSG_ID <> 'BZL9898'                          ESF
+     C                   Eval      Msg_Data = *BLANKS                           ESF
+A5038C                   EndIf
+     C                   Eval      Msg_Act  = 'A'                               ESF
+     C                   Eval      Msg_Prog = @PGMQ                             ESF
+     **                                                                        ESF
+     C                   Callp     UT0500  (MSG_ACT:                            ESF
+     C                                      MSG_ID:                             ESF
+     C                                      MSG_DATA:                           ESF
+     C                                      MSG_PROG)                           ESF
+     **                                                                        ESF
+     C                   EndSr                                                  ESF
+      ********************************************************************
+     C     REMOVEMSG     BegSr                                                  ESF
+      ********************************************************************
+     **   sub routine to clear the program message queue               **      ESF
+
+     C                   Eval      *IN01 =*Off
+     C                   Eval      Msg_Act  = 'R'                               ESF
+     C                   Eval      Msg_ID   = *BLANKS                           ESF
+     C                   Eval      Msg_DATA = *BLANKS                           ESF
+     C                   Eval      Msg_Prog = @PGMQ                             ESF
+     **                                                                        ESF
+     C                   Callp     UT0500  (MSG_ACT:                            ESF
+     C                                      MSG_ID:                             ESF
+     C                                      MSG_DATA:                           ESF
+     C                                      MSG_PROG)                           ESF
+     **                                                                        ESF
+     C                   EndSr                                                  ESF
+      ********************************************************************
+     C     HelpScreen    BegSr
+      ********************************************************************
+     *  Help Screen Window Routine
+
+     C                   Eval      U303_PROGRAM = KeyProgram
+     C                   Eval      U303_FORMAT  = WSFORMAT
+     C                   Call      'UT0303'
+     C                   Parm                    U303_PROGRAM
+     C                   Parm                    U303_FORMAT
+
+     C                   EndSr
+      ********************************************************************
+a4726C     SetJump       BegSr
+      ********************************************************************
+
+a4726C                   Open      MENUJMP
+a4726C     UserProfile   Chain     MENUJMP
+a4726C                   If        %Found(MENUJMP)
+a4726C                   Move      JMDATA        DATA
+A4916C                   Else
+  |  C     DftProfile    Chain     MENUJMP
+  |  C                   If        %Found(MENUJMP)
+  |  C                   Move      JMDATA        DATA
+A4916C                   EndIf
+a4726C                   EndIf
+      *the indicators go from 64-74 (11) skips F13 the menu is 1-12 *
+a4726C                   Do        11            JCnt
+a4726C                   Eval      AllowJump(JCnt)=JumpMenu(JCnt+1)<>*Blanks
+a4726C                   EndDo
+a4726C                   Close     MENUJMP
+
+a4726C                   EndSr
+A5038 ********************************************************************
+  |  C     GETF3DATA     BegSr
+  |   ********************************************************************
+  |
+  |  C                   Eval      F3Data = *Blanks
+  |  C                   Eval      KeyCommand = *Blanks
+  |  C                   MoveL     KeyProgram    KeyCommand
+A5038C                   Eval      RptCommand =  %Trim(KeyCommand) + 'R'
+A5038C     MOpt1Key      Chain     MENUOPT1
+  |  C                   If        %Found(MENUOPT1)
+  |  C                   Eval      KeyMenuName = O1MNUPGM
+  |
+A5673C                   If        KeyCommand = 'GUMENU01'
+A5673C                   ExSR      FindFromMenu
+A5673C                   EndIf
+  |
+  |  C     ScData1Key    Chain     SCDATA1
+  |  C                   If        %Found(SCDATA1)
+  |  C                   Eval      F3Data = O1MNUPGM
+  |  C                   Else
+  |
+  |  C     MOpt1Key      ReadE     MENUOPT1
+  |  C                   DoW       Not %EOF(MENUOPT1)
+  |  C                             And NOT %Found(SCDATA1)
+  |  C                   Eval      KeyMenuName = O1MNUPGM
+  |  C     ScData1Key    Chain     SCDATA1
+  |  C                   If        %Found(SCDATA1)
+  |  C                   Eval      F3Data = O1MNUPGM
+  |  C                   Leave
+  |  C                   Else
+  |  C                   Eval      F3Data = InitProgram
+  |  C                   Eval      KeyMenuName = InitProgram
+  |  C                   EndIf
+  |  C     MOpt1Key      ReadE     MENUOPT1
+  |  C                   EndDo
+  |
+  |  C                   If        Not %Found(SCDATA1)
+  |  C                   Eval      F3Data = InitProgram
+  |  C                   Eval      KeyMenuName = InitProgram
+  |  C                   EndIf
+  |
+A5673C                   EndIf
+A5673C                   Eval      @F3MSG = 'F3=' + F3Data
+  |
+  |  C                   If        InitProgram <> KeyMenuName
+  |  C                             Or KeyProgram <> KeyMenuName
+  |  C                   Eval      DspF3Key = *On
+  |  C                   Else
+  |  C                   Eval      DspF3Key = *Off
+  |  C                   EndIf
+  |
+  |  C                   Else
+  |  C                   Eval      DspF3Key = *Off
+  |  C                   EndIf
+  |
+  |  C                   Eval      Idx2 = 1
+  |  C     F3Data        Lookup    MenuList(Idx2)                         69
+  |  C                   If        *IN69 = *Off
+  |  C                             Or F3Data = RptCommand
+A5673C                             Or KeyMenuName = 'DSJOBM31'
+
+  |  C     MOpt1Key      ReadE     MENUOPT1
+  |  C                   DoW       Not %EOF(MENUOPT1)
+  |  C                   If        O1MNUPGM = MenuList(9)
+  |  C                   Eval      KeyMenuName = O1MNUPGM
+  |  C                   Eval      @F3MSG = 'F3=' + KeyMenuName
+  |  C                   Else
+  |
+  |  C                   If        F3Data = RptCommand
+  |  C                   Eval      KeyMenuName = O1MNUPGM
+  |  C                   Eval      @F3MSG = 'F3=' + KeyMenuName
+  |  C                   EndIf
+  |
+  |  C                   EndIf
+  |  C     MOpt1Key      ReadE     MENUOPT1
+  |  C                   EndDo
+  |
+A5038C                   EndIf
+A5038
+A5038C                   EndSr
+A5673 ********************************************************************
+  |  C     FindFromMenu  BegSr
+  |   ********************************************************************
+  |
+  |  C                   Eval      M1 = 9
+  |  C                   Eval      GUDefault = 'N'
+  |   *******************
+  |  C                   DoW       M1 <> *ZERO
+  |   *******
+  |  C                   Select
+  |   **
+  |  C                   When      M1 = 1
+  |  C                   Eval      GUDefault = 'Y'
+  |  C                   Eval      M1 = *ZERO
+  |   **
+  |  C                   When      GUFOUND = 'Y'
+  |  C                   Eval      GUDefault = 'Y'
+  |  C                   Eval      M1 = *ZERO
+  |   **
+  |  C                   When      MENULIST(M1) = 'GUMENU01'
+  |  C                   Eval      M1 = M1 - 1
+  |  C                   If        M1 = *ZERO
+  |  C                   Eval      GUDefault = 'Y'
+  |  C                   Else
+  |  C                   Eval      O1MNUPGM    = MENULIST(M1)
+  |  C                   Eval      KeyMenuName = MENULIST(M1)
+  |  C                   Eval      GUFOUND = 'Y'
+  |  C                   Eval      GUDefault = 'N'
+  |  C                   Eval      M1 = *ZERO
+  |  C                   EndIf
+  |   **
+  |  C                   Other
+  |  C                   Eval      M1 = M1 - 1
+  |   **
+  |  C                   EndSl
+  |   *******
+  |  C                   EndDo
+  |   *******************
+  |  C                   If        GUDefault = 'Y'
+  |   *******
+  |  C                   Select
+  |
+  |  C                   When      MENULIST(9) = 'GUMENU01'
+  |  C                   If        MENULIST(8) = 'DSJOBM315'
+  |  C                   Eval      O1MNUPGM    = MENULIST(7)
+  |  C                   Eval      KeyMenuName = MENULIST(7)
+  |  C                   Else
+  |  C                   Eval      O1MNUPGM    = MENULIST(8)
+  |  C                   Eval      KeyMenuName = MENULIST(8)
+  |  C                   EndIf
+  |
+  |  C                   When      MENULIST(9) = 'DSJOBM315'
+  |  C                   If        MENULIST(8) = 'GUMENU01'
+  |  C                   Eval      O1MNUPGM    = MENULIST(7)
+  |  C                   Eval      KeyMenuName = MENULIST(7)
+  |  C                   Else
+  |  C                   Eval      O1MNUPGM    = MENULIST(8)
+  |  C                   Eval      KeyMenuName = MENULIST(8)
+  |  C                   EndIf
+  |
+  |  C                   Other
+  |  C                   Eval      O1MNUPGM    = MENULIST(9)
+  |  C                   Eval      KeyMenuName = MENULIST(9)
+  |
+  |  C                   EndSl
+  |   *******
+  |  C                   EndIf
+  |   *******************
+A5673C                   EndSr
+A4916 ********************************************************************
+  |  C     CHECK4RPT     BegSr
+  |   ********************************************************************
+  |
+  |  C                   Eval      RptCheck = %SUBST(KeyProgram:7:2)
+  |  C                   Eval      RptCheck1 = %SUBST(KeyProgram:1:2)
+  |  C                   If        RptCheck = '00'
+  |  C                             And RptCheck1 <> 'AP'
+  |  C                   Eval      ShowRptOpt = *On
+  |  C                   Else
+  |  C                   Eval      ShowRptOpt = *Off
+  |  C                   EndIf
+  |
+  |  C                   EndSr
+A4916
+A4941*****************************************************************
+  |  C     GETLDA        BEGSR
+  |  *****************************************************************
+  |  *
+  |  C     *DTAARA       DEFINE    *LDA          LDA
+  |  C                   IN        LDA
+  |  C                   OUT       LDA
+  |  *
+A4941C                   ENDSR
+      ********************************************************************
+     C     *INZSR        BegSr
+      ********************************************************************
+
+     C     *Entry        PList
+     C                   Parm                    InOutQ
+a4482C                   Parm                    InFrMenu
+a4482C                   Parm                    InToMenu
+
+A4941
+  |  C                   ExSr      GETLDA
+  |
+A2554C                   Eval      Co#_Restrict = LDACFL
+  |  C                   Eval      Lcn_Restrict = LDALFL
+  |
+  |  C                   Open      SCDATA4
+  |  C                   Open      SCDATA1
+A5673C                   Open      SCDATA
+A4941
+     C                   Eval      Function = 'SflNew'
+     C                   Eval      @OUTQ= InOutQ
+     C                   Eval      ErrorFlag = *Off
+     C                   Eval      RcdFnd = *Off
+     C                   Eval      RRR# = 0
+A5673C                   Eval      Auth91 = *Off
+A5673C                   Eval      AuthGU = *Off
+
+     C                   If        LDACO# <> *Blanks
+A4941C                   Move      LDACO#        KeyCompany#
+     C                   Move      LDACO#        @CO#
+     C                   Eval      @LOCN = LDALCN
+     C                   Eval      NoLDAFound = *Off
+     C                   Else
+A4941C                   Eval      KeyCompany# = *Zeros
+     C                   Eval      NoLDAFound = *On
+     C                   EndIf
+
+d4482C*                  Eval      Text1 = 'Invalid Option.'
+d4482C*                  Eval      Text2 = 'Invalid User Profile'
+d4482C*                  Eval      Text3 = 'Unable to execute at this time.'
+
+A4941C     MnuusrKey     Chain     MNUUSR
+  |  C                   If        %Found(MNUUSR)
+  |
+  |  C                   If        MNAPGM = *Blanks
+  |  C                   Eval      MNAPGM='MASTERMENU'
+  |  C                   EndIf
+  |
+  |  C                   If        MNASHAU = *Blanks
+  |  C                   Eval      MNASHAU='N'
+  |  C                   EndIf
+  |
+  |  C                   If        MNAHIDE = *Blanks
+  |  C                   Eval      MNAHIDE = 'N'
+  |  C                   EndIf
+  |
+  |  C                   If        MNAF11 = *Blanks
+  |  C                   Eval      MNAF11 = 'Y'
+  |  C                   EndIf
+  |
+  |  C                   If        MNALANG <>'E' and
+  |  C                             MNALANG <>'F' and
+  |  C                             MNALANG <>'S'
+  |  C                   Eval      MNALANG='E'
+  |  C                   EndIf
+  |
+  |  C                   Else
+
+      * Default program
+
+     C                   Eval      MNAPGM='MASTERMENU'
+a4726C                   Eval      MNASHAU='N'
+     C                   Eval      MNAHIDE='N'
+a4726C                   Eval      MNAF11 ='N'
+     C                   Eval      MNALANG='E'
+     C                   Eval      DspF5Key = *Off
+     C                   Eval      DspF15Key = *Off
+     C                   EndIf
+     C
+a4726C                   Eval      DspF11Key = MNAF11    = 'Y'
+     C                   Eval      DspF5Key  = MNACHGUSR = 'Y'
+     C                   Eval      DspF15Key = MNAEDTDTA = 'Y'
+
+a4482C                   Close     MNUUSR
+
+a4482C                   If        InToMenu = *Blanks
+     C                   Eval      KeyProgram=MNAPGM
+a4482C                   Else
+a4482C                   Eval      KeyProgram=InToMenu
+a4482C                   EndIf
+
+     C                   Eval      SflClr = *On
+A5148C                   If        MNHHELD <> 'Y'
+     C                   Write     MNU003C1
+A5148C                   Else
+A5148C                   Write     MNU003C2
+A5148C                   EndIf
+     C                   Eval      SflClr = *Off
+     C                   Eval      RRR# = 0
+     C                   Eval      REC# = 0
+     C                   Eval      Rcdcnt = 0
+a4482C                   If        InFrMenu= *Blanks
+     C
+     C                   Eval      InitProgram=MNAPGM
+     C                   For       Index= 1 to %Elem(MenuList)
+A5360C                   Eval      MenuList(Index)='DSJOBM00'
+D5360C*                   Eval      MenuList(Index)=InitProgram
+m4482C*                  Eval      @F3MSG='F3=' + InitProgram
+     C                   EndFor
+     C
+a4482C                   Else
+a4482C                   Eval      InitProgram=InFrMenu
+a4482C                   EndIf
+m4482C                   Eval      @F3MSG='F3=' + InitProgram
+D4916 *    *DTAARA       DEFINE    MNU003DATA    DATA
+D4916 *                  IN        DATA
+a4726C                   Exsr      SetJump
+A4916 *
+  |  C                   Exsr      CHECK4RPT
+A4916
+A6196 * Check for an Inquiry user only
+  |
+A6196C                   Eval      InqUser = *Off
+A6197C                   Eval      PgmUser = *Off
+A6196
+  |  C                   Call      'RTVSYSNAM'
+  |  C                   Parm                    AS400Name
+  |
+  |  C                   If        AS400Name = 'CORP01'
+  |  C     UserProfile   Chain     SCINQUSR
+  |  C                   Else
+  |  C     UserProfile   Chain     SCINQUSR1
+  |  C                   EndIf
+  |
+  |  C                   If        %Found(SCINQUSR)
+  |  C                             And SCIIACT = 'A'
+  |  C                             Or %Found(SCINQUSR1)
+  |  C                             And SCIIACT = 'A'
+  |  C                   Eval      InqUser = *On
+  |  C                   EndIf
+A6196
+A6197C                   If        %Found(SCINQUSR)
+  |  C                             And SCIIACT = 'A'
+  |  C                             And SCIIPGMR = 'Y'
+  |  C                             Or %Found(SCINQUSR1)
+  |  C                             And SCIIACT = 'A'
+  |  C                             And SCIIPGMR = 'Y'
+  |  C                   Eval      PgmUser = *On
+  |  C                   Eval      InqUser = *On
+  |  C                   EndIf
+A6197
+      * Key List for MENUOPT
+
+     C     MNUKEY        KList
+     C                   KFld                    KeyProgram
+     C                   KFld                    @SLCTOP
+
+      * Key List for MENUOPT
+
+A5673C     GENKEY        KList
+A5673C                   KFld                    GENProgram
+A5673C                   KFld                    GenOpt#
+
+     C     AuthKey       KList
+A4941C                   KFld                    KeyCompany#
+     C                   KFld                    UserProfile
+     C                   KFld                    KeyProgram
+     C                   KFld                    KeyOption
+
+     C     OptionKey     KList
+     C                   KFld                    KeyMenu
+     C                   KFld                    KeyOpt#
+A5038
+  |   * Key List for MENUOPT1
+  |
+  |  C     MOpt1Key      KList
+  |  C                   KFld                    KeyCommand
+  |  C                   KFld                    KeyType
+  |
+  |   * Key List for SCDATA1
+  |
+  |  C     ScData1Key    KList
+  |  C                   KFld                    UserProfile
+A5038C                   KFld                    KeyMenuName
+
+A5673C     GUData1Key    KList
+A5673C                   KFld                    UserProfile
+A5673C                   KFld                    GUMenuName
+
+  |   * Key List for MNUUSR
+  |
+  |  C     MnuusrKey     KList
+  |  C                   KFld                    UserProfile
+  |  C                   KFld                    LDACO#
+A4941
+     C                   EndSr
+      *****************************************************************
+
+NEW DSB002 - Progam
+
+     *****************************************************************
+     *DSB002     
+     *    GET USER DATA FROM USER CONTROL FILE AND
+     *    PLACE IN LDA
+     *
+0120 * CAL - 03/20/96 - DIST0120 - ADD OE001D FOR REMOTE ORDER
+     *                             ENTRY BY SALESPERSON FUNCTION
+     *                             RESTRICTION ( 'Y' = RESTRICTED )
+     *                             UPDATE 255 OF LDA
+     *
+     * NLM - 06/14/96 - DIST0123 - ADD FLAG FOR SHELTERS
+     *
+     * SAK - 01/09/02 - DIST315607 - Replace DSUSERS file with new
+     *                               file BUUSERS.  Convert to RPGIV.
+     * NLM - 10/30/03 - DIST4228 - ADD DEFAULT REGION
+     *
+     * SAK - 04/14/05 - DIST494107 - If LDACO# is blanks get default
+     *                               company from BZUSERS to use for
+     *                               loading of defaults.
+     *
+     * SAK - 09/13/05 - DIST494117 - If the record is not found in BUUSERS
+     *                               Chain to BZUSERS and try again with the
+     *                               default company.
+     *
+     *****************************************************************
+D3156 *DSUSERS   IF   E           K DISK
+D4941 *BUUSERS   IF   E           K DISK
+A4941FBUUSERS1  IF   E           K DISK
+A4941FBZUSERS1  IF   E           K DISK
+A4228FDSCOREG   IF   E           K DISK
+0120 D RC              S              1    DIM(20)                              RESTRICTED Y/N
+     D                SDS
+     D USERID                254    263
+     D                UDS
+a4228D LDAREG                252    253
+     D LDASHL                254    254
+     D LDAROE                         1
+     D LDAMCS                         1
+     D LDANAM                        10
+     D LDAMNU                        10
+     D LDAAUT                         1
+     D LDACO#                         2
+     D LDALCN                         3
+     D LDACFL                         1
+     D LDALFL                         1
+     D ERRFLG                         1
+     D LDACST                         1
+     * POSITIONS 287 THRU 313 RESERVED FOR MULTIPLE LOCATIONS
+     D LDALCR                314    316
+     D LDALFR                         1
+     *---------------------------------------------------------------------
+     * Stand Alone Fields - TOP
+     *---------------------------------------------------------------------
+A4941D DftValueKey     s              1    Inz('Y')
+A4941D KeyCo#          s              2
+     D KEY             s             10
+     D PMID            s             10
+     *---------------------------------------------------------------------
+     * Stand Alone Fields - BOTTOM
+     *---------------------------------------------------------------------
+
+     * POSITIONS 318 THRU 327 RESERVED FOR UNIQUE MEMBER NAME DSB025
+D4941 *    USERID        Chain     BUUSERS                            01
+D3156 *    USERID        CHAIN     DSUSERS                            01
+D4941 *                  if        *IN01 = *on
+D4941 *                  MOVEL     '*ALL'        KEY
+D3156 *    KEY           CHAIN     DSUSERS                            01
+D4941 *    KEY           Chain     BUUSERS                            01
+D4941 *                  endif
+A4941
+  |  * Keylist for BZUSERS1
+  |
+  |  C     DftKey        KList
+  |  C                   KFld                    USERID
+  |  C                   KFld                    DftValueKey
+  |
+  |  * Keylist for BUUSERS1
+  |
+  |  C     DftUserKey    KList
+  |  C                   KFld                    KeyCo#
+  |  C                   KFld                    USERID
+  |
+  |  * If LDACO# blank get default from BZUSERS1
+  |
+  |  C                   If        LDACO# = *Blanks
+  |  C     DftKey        Chain     BZUSERS1
+  |  C                   If        %Found(BZUSERS1)
+  |  C                   Move      BZZCO#        KeyCo#
+  |  C     DftUserKey    Chain     BUUSERS1                           01
+  |  C                   EndIf
+  |  C                   Else
+  |  C                   Move      LDACO#        KeyCo#
+A4941C     DftUserKey    Chain     BUUSERS1                           01
+C0017C                   If        *IN01 = *On
+  |  C     DftKey        Chain     BZUSERS1
+  |  C                   If        %Found(BZUSERS1)
+  |  C                   Move      BZZCO#        KeyCo#
+  |  C     DftUserKey    Chain     BUUSERS1                           01
+  |  C                   EndIf
+  |  C                   EndIf
+C0017
+A4941C                   EndIf
+A4941
+     *
+     C                   MOVE      USERID        LDANAM
+     C                   if        *IN01 = *on
+     C                   MOVE      '*'           ERRFLG
+     C                   ELSE
+     C                   MOVE      USRMNU        LDAMNU
+     C                   MOVE      USRAUT        LDAAUT
+     C                   MOVE      USRCO#        LDACO#
+     C                   MOVE      USRLCN        LDALCN
+     C                   MOVE      USRLCR        LDALCR
+     C                   MOVE      USRCFL        LDACFL
+     C                   MOVE      USRLFL        LDALFL
+     C                   MOVE      USRLFR        LDALFR
+     C                   MOVE      ' '           ERRFLG
+     C                   MOVE      USRCST        LDACST
+     C                   MOVE      USRMCS        LDAMCS
+     **FORCE NO SHELTERS IF CAN'T SEE VENDOR COST
+     C                   if        LDACST = 'N'
+     C                   MOVE      'N'           LDASHL
+     C                   ELSE
+     C                   MOVE      USRSHL        LDASHL
+     C                   endif
+a4228C                   Move      LDACO#        CRCO#
+a4228C     CRCO#         Chain     DSCOREG
+a4228C                   If        %Found (DSCOREG)
+a4228C                   Move      CRREG         LDAREG
+a4228C                   EndIf
+     C                   endif
+     C                   MOVE      *on           *INLR
+     C                   RETURN
+
+NEW UT0500 - Program
+
+     *****************************************************************
+     *   CREATED BY..: RON WALDROP                                   *
+     *   DATE CREATED: 12/18/02                                      *
+     *   PROJECT #...: DIST3381-13                                   *
+     *   DESCRIPTION.: ORDER ENTRY REWRITE - FIRST SCREEN            *
+     *****************************************************************
+     *****************************************************************
+     D Esf_MsgAct      S              1                                         Esf
+     D Esf_MsgProg     S             10                                         Esf
+     **                                                                        Esf
+     D Esf_MsgID       S             10                                         Esf
+     D Esf_MsgLoc      S             20    INZ('BUNZLMSG  *LIBL     ')          Esf
+     D Esf_MsgData     S             75                                         Esf
+     D Esf_MsgLen      S              9B 0                                      Esf
+     D Esf_MsgType     S             10    INZ('*DIAG     ')                    Esf
+     D Esf_MsgQue      S             10    INZ('*         ')                    Esf
+     D Esf_MsgQueNbr   S              9B 0 INZ(0)                               Esf
+     D Esf_MsgKey      S              4                                         Esf
+     *****************                                                         Esf
+     D Esf_RmvKey      S              4                                         Esf
+     D Esf_RmvMsg      S             10    INZ('*ALL      ')                    Esf
+     *****************                                                         Esf
+     D  Esf_Error_DS   DS                                                       Esf
+     D Esf_ErrProv             1      4B 0 INZ(116)                             Esf
+     D Esf_ErrAval             5      8B 0 INZ(0)                               Esf
+     D Esf_ErrMsg#             9     15                                         Esf
+     D Esf_ErrNbr             16     16                                         Esf
+     D Esf_ErrData            17    116                                         Esf
+     *****************************************************************         Esf
+     C     *ENTRY        PList                                                  Esf
+     C                   Parm                    Esf_MsgAct                     Esf
+     C                   Parm                    Esf_MsgID                      Esf
+     C                   Parm                    Esf_MsgData                    Esf
+     C                   Parm                    Esf_MsgProg                    Esf
+     *****************************************************************         Esf
+     C                   If        Esf_MsgAct = 'A'                             Esf
+     C                   ExSR      WriteMsg                                     Esf
+     C                   EndIf                                                  Esf
+     **                                                                        Esf
+     C                   If        Esf_MsgACT = 'R'                             Esf
+     C                   ExSR      RemoveMsg                                    Esf
+     C                   EndIf                                                  Esf
+     **                                                                        Esf
+     C                   Eval      *INLR = *ON                                  Esf
+     **                                                                        Esf
+     C                   Return                                                 Esf
+     *****************************************************************         Esf
+     C     WriteMsg      BegSr                                                  Esf
+     **                                                                        Esf
+     C                   Eval      Esf_MsgLen = %LEN(%TRIM(Esf_MsgData))        Esf
+     C                   Eval      Esf_MsgQue = Esf_MsgProg                     Esf
+     **                                                                        Esf
+     C                   Call      'QMHSNDPM'                                   Esf
+     C                   Parm                    Esf_MsgID                      Esf
+     C                   Parm                    Esf_MsgLoc                     Esf
+     C                   Parm                    Esf_MsgData                    Esf
+     C                   Parm                    Esf_MsgLen                     Esf
+     C                   Parm                    Esf_MsgType                    Esf
+     C                   Parm                    Esf_MsgQue                     Esf
+     C                   Parm                    Esf_MsgQueNbr                  Esf
+     C                   Parm                    Esf_MsgKey                     Esf
+     C                   Parm                    Esf_Error_DS                   Esf
+     **                                                                        Esf
+     C                   EndSR                                                  Esf
+     *****************************************************************         Esf
+     C     RemoveMsg     BegSr                                                  Esf
+     **                                                                        Esf
+     C                   Eval      Esf_MsgQue = Esf_MsgProg                     Esf
+     C                   Eval      Esf_RmvKey = *BLANKS                         Esf
+     **                                                                        Esf
+     C                   Call      'QMHRMVPM'                                   Esf
+     C                   Parm                    Esf_MsgQue                     Esf
+     C                   Parm                    Esf_MsgQueNbr                  Esf
+     C                   Parm                    Esf_RmvKey                     Esf
+     C                   Parm                    Esf_RmvMsg                     Esf
+     C                   Parm                    Esf_Error_DS                   Esf
+     **                                                                        Esf
+     C                   EndSR                                                  Esf
+     *****************************************************************         Esf
+     *****************************************************************
+     **   prototype for call to error message subfile program       **         ESF
+      * UT0500                                                                  ESF
+     D UT0500          PR                  ExtPgm('UT0500')                     ESF
+     D   P_Act                        1                                         ESF
+     D   P_MsgId                     10                                         ESF
+     D   P_Msg                       75                                         ESF
+     D   P_Prog                      10                                         ESF
+     D Msg_Act         S              1                                         ESF
+     D Msg_Id          S             10                                         ESF
+     D Msg_Data        S             75                                         ESF
+     D Msg_Prog        S             10                                         ESF

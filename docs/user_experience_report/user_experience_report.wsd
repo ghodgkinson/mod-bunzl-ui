@@ -1,0 +1,74 @@
+package "UX Model" {
+    class MainMenu <<Screen>> {
+        @CO# : Company Number
+        @LOCN : Location
+        @TITLE : Menu Title
+        @MENU : Menu Name
+        @MSG : Message Area
+        @OPTION# : Option Number
+        @ODESC : Option Description
+        @SLCTOP : Selected Option
+        @OUTQ : Printer Output Queue
+        @F3MSG : F3 Key Message
+        @F12MSG : F12 Key Message
+        F2 : Command Key
+        F3 : Command Key
+        F4 : Command Key
+        F5 : Command Key
+        F6 : Command Key
+        F7 : Command Key
+        F9 : Command Key
+        F11 : Command Key
+        F12 : Command Key
+        F15 : Command Key
+    }
+
+    class HandheldMenu <<Screen>> {
+        @CO# : Company Number
+        @LOCN : Location
+        @TITLE : Menu Title
+        @MENU : Menu Name
+        @SLCTOP : Selected Option
+        @OUTQ : Printer Output Queue
+        @F3MSG : F3 Key Message
+        @F12MSG : F12 Key Message
+        F3 : Command Key
+        F4 : Command Key
+        F5 : Command Key
+        F6 : Command Key
+        F7 : Command Key
+        F9 : Command Key
+        F11 : Command Key
+        F12 : Command Key
+        F15 : Command Key
+    }
+
+    class ErrorMessageSubfile <<Screen>> {
+        ESF_MSGKEY : Error Message Key
+        @PGMQ : Program Message Queue
+    }
+
+    class MenuSettings <<Screen>> {
+        SettingsFields : Various fields for configuring menu settings
+    }
+
+    class ChangeCompanyLocation <<Screen>> {
+        CompanyNumber : Field to enter the new company number
+        Location : Field to enter the new location
+    }
+
+    class HelpScreen <<Screen>> {
+        HelpText : Various fields displaying help information
+    }
+
+    MainMenu -down-> HandheldMenu : Option Selection
+    MainMenu -down-> ErrorMessageSubfile : Error Handling
+    MainMenu -down-> MenuSettings : F5 Key
+    MainMenu -down-> ChangeCompanyLocation : F11 Key
+    MainMenu -down-> HelpScreen : F13 Key
+
+    HandheldMenu -down-> ErrorMessageSubfile : Error Handling
+    HandheldMenu -down-> MenuSettings : F5 Key
+    HandheldMenu -down-> ChangeCompanyLocation : F11 Key
+    HandheldMenu -down-> HelpScreen : F13 Key
+}

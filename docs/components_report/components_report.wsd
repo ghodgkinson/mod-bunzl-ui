@@ -1,0 +1,45 @@
+package "Component Model" {
+
+    component UserManagement [
+        UserManagement: 
+        BUUSERS (PhysicalFile)
+        BUUSERS1 (LogicalFile)
+        BZUSERS (PhysicalFile)
+        BZUSERS1 (LogicalFile)
+        DSB002 (SourcePhysicalFile)
+    ]
+
+    component CorporateData [
+        CorporateData: 
+        DSCOREG (PhysicalFile)
+    ]
+
+    component MenuSystem [
+        MenuSystem: 
+        MENUOPT (PhysicalFile)
+        MENUOPT1 (LogicalFile)
+        MNUUSR (PhysicalFile)
+        MENUHDR (PhysicalFile)
+        SCINQUSR (PhysicalFile)
+        SCINQUSR1 (LogicalFile)
+        SCDATA (PhysicalFile)
+        SCDATA4 (LogicalFile)
+        MENUJMP (PhysicalFile)
+        MNUUSG (PhysicalFile)
+        MNU003 (SourcePhysicalFile)
+        MNU003CL (SourcePhysicalFile)
+        Screens.txt (DisplayFile)
+    ]
+
+    component ErrorHandling [
+        ErrorHandling: 
+        UT0500 (SourcePhysicalFile)
+        CopyBook.txt (Prototypes)
+    ]
+
+    UserManagement --> CorporateData
+    UserManagement --> MenuSystem
+    MenuSystem --> UserManagement
+    MenuSystem --> ErrorHandling
+
+}
