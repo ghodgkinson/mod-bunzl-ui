@@ -1,74 +1,198 @@
 package "UX Model" {
-    class MainMenu <<Screen>> {
-        @CO# : Company Number
-        @LOCN : Location
-        @TITLE : Menu Title
-        @MENU : Menu Name
-        @MSG : Message Area
-        @OPTION# : Option Number
-        @ODESC : Option Description
-        @SLCTOP : Selected Option
-        @OUTQ : Printer Output Queue
-        @F3MSG : F3 Key Message
-        @F12MSG : F12 Key Message
-        F2 : Command Key
-        F3 : Command Key
-        F4 : Command Key
-        F5 : Command Key
-        F6 : Command Key
-        F7 : Command Key
-        F9 : Command Key
-        F11 : Command Key
-        F12 : Command Key
-        F15 : Command Key
-    }
 
-    class HandheldMenu <<Screen>> {
-        @CO# : Company Number
-        @LOCN : Location
-        @TITLE : Menu Title
-        @MENU : Menu Name
-        @SLCTOP : Selected Option
-        @OUTQ : Printer Output Queue
-        @F3MSG : F3 Key Message
-        @F12MSG : F12 Key Message
-        F3 : Command Key
-        F4 : Command Key
-        F5 : Command Key
-        F6 : Command Key
-        F7 : Command Key
-        F9 : Command Key
-        F11 : Command Key
-        F12 : Command Key
-        F15 : Command Key
-    }
+  class MASTERMENU <<Screen>> {
+    Title: "Main Menu"
+    Options: 
+    - General Ledger Menu
+    - Accounts Payable Menu
+    - Payroll Menu
+    - Real Vision Customer Specific Menu
+    - Distribution Menu
+    - Security Menu
+    - Business Intelligence Menu
+    - Corporate Secure Menu
+    - Websphere Check Menu
+    - Corporate Rebates Menu
+    - Corporate Marketing Menu
+    - Corporate Warehouse Menu
+    - Corporate Accounting Menu
+    - Run Query
+    - Corporate EDI Menu
+    - MIS Manager Menu
+    - Division Rebates Menu
+    - Corporate Job Menu
+    - Corporate Operations Menu
+    - PC Group Menu
+    - Programmer Menu
+    - General Utilities Menu
+  }
 
-    class ErrorMessageSubfile <<Screen>> {
-        ESF_MSGKEY : Error Message Key
-        @PGMQ : Program Message Queue
-    }
+  class GLMENU00 <<Screen>> {
+    Title: "General Ledger Menu"
+    Options: 
+    - Accounts & Period Maintenance Menu
+    - Entry & Posting Menu
+    - Financial Statement Menu
+    - Month-End / Year-End Menu
+    - G/L System Support
+    - General Utilities Menu
+  }
 
-    class MenuSettings <<Screen>> {
-        SettingsFields : Various fields for configuring menu settings
-    }
+  class APMENU00 <<Screen>> {
+    Title: "Accounts Payable Menu"
+    Options: 
+    - Vendor Maintenance Menu
+    - Voucher Entry & Payment Menu
+    - Check Reconciliation Menu
+    - RBNI Menu
+    - Report Menu
+    - File Purge Menu
+    - System Support Menu
+    - Vendor 1099 Menu
+    - General Utilities Menu
+  }
 
-    class ChangeCompanyLocation <<Screen>> {
-        CompanyNumber : Field to enter the new company number
-        Location : Field to enter the new location
-    }
+  class APMENU01 <<Screen>> {
+    Title: "Vendor Maintenance Menu"
+    Options: 
+    - Vendor Setup
+    - Vendor Inquiry
+    - Return to Accounts Payable Master Menu
+  }
 
-    class HelpScreen <<Screen>> {
-        HelpText : Various fields displaying help information
-    }
+  class APMENU02 <<Screen>> {
+    Title: "Voucher Entry & Payment Menu"
+    Options: 
+    - Voucher Entry
+    - Payment Processing
+    - Payment Inquiry
+    - Payment Reversal
+    - Return to Accounts Payable Master Menu
+  }
 
-    MainMenu -down-> HandheldMenu : Option Selection
-    MainMenu -down-> ErrorMessageSubfile : Error Handling
-    MainMenu -down-> MenuSettings : F5 Key
-    MainMenu -down-> ChangeCompanyLocation : F11 Key
-    MainMenu -down-> HelpScreen : F13 Key
+  class APMENU03 <<Screen>> {
+    Title: "Check Reconciliation Menu"
+    Options: 
+    - Reconcile Checks
+    - Check Inquiry
+    - Check Reversal
+    - Return to Accounts Payable Master Menu
+  }
 
-    HandheldMenu -down-> ErrorMessageSubfile : Error Handling
-    HandheldMenu -down-> MenuSettings : F5 Key
-    HandheldMenu -down-> ChangeCompanyLocation : F11 Key
-    HandheldMenu -down-> HelpScreen : F13 Key
+  class APMENU04 <<Screen>> {
+    Title: "RBNI Menu"
+    Options: 
+    - RBNI Setup
+    - RBNI Inquiry
+    - RBNI Processing
+    - Return to Accounts Payable Master Menu
+  }
+
+  class APMENU10 <<Screen>> {
+    Title: "Report Menu"
+    Options: 
+    - Generate Vendor Report
+    - Generate Payment Report
+    - Generate Reconciliation Report
+    - Return to Accounts Payable Master Menu
+  }
+
+  class APMENU30 <<Screen>> {
+    Title: "File Purge Menu"
+    Options: 
+    - Purge Old Vouchers
+    - Purge Old Payments
+    - Purge Old Reconciliations
+    - Return to Accounts Payable Master Menu
+  }
+
+  class APMENU31 <<Screen>> {
+    Title: "System Support Menu"
+    Options: 
+    - System Diagnostics
+    - System Updates
+    - System Backup
+    - Return to Accounts Payable Master Menu
+  }
+
+  class APMENU40 <<Screen>> {
+    Title: "Vendor 1099 Menu"
+    Options: 
+    - 1099 Setup
+    - 1099 Inquiry
+    - 1099 Processing
+    - Return to Accounts Payable Master Menu
+  }
+
+  class DSJOBM00 <<Screen>> {
+    Title: "Distribution Menu"
+    Options: 
+    - Customer Menu
+    - Accounts Receivable Menu
+    - Order Entry Menu
+    - Inventory Menu
+    - Purchasing Menu
+    - Pricing Menu
+    - Rebate Menu
+    - Daily Menu
+    - Weekly Menu
+    - Monthly Menu
+    - Sales Analysis Menu
+    - File Purge Menu
+    - Physical Inventory Menu
+    - System Support Menu
+    - Miscellaneous Reports Menu
+    - Warehouse Menu
+    - Commission Menu
+    - Salesperson Menu
+    - 3rd Party Rebates Menu
+    - Production Menu
+    - Purchasing Analysis Menu
+    - Shelter Menu
+    - Management Information Menu
+    - File Transfer Menu
+    - Logistics Menu
+    - Bunzl Procedures Menu
+    - Bunzl Support Menu
+    - GENTRAN EDI Main Menu
+    - TrailBlazer Communications Menu
+    - General Utilities Menu
+  }
+
+  class GUMENU01 <<Screen>> {
+    Title: "General Utilities Menu"
+    Options: 
+    - Display Messages for User
+    - Send Break Message
+    - Send a Message
+    - Change Password
+    - Work with Writers
+    - Display Program Description
+    - Work with User Spooled Files
+    - Faxing Main Menu
+    - Work Job Queue
+    - Ping a System
+    - Work with Configuration Status
+    - Work Active Job
+    - Display Log
+    - Robot Menu
+    - Copy Spooled File
+    - Work Active Job Inquiry
+    - General Utilities Menu
+  }
+
+  MASTERMENU --> GLMENU00
+  MASTERMENU --> APMENU00
+  MASTERMENU --> DSJOBM00
+  MASTERMENU --> GUMENU01
+
+  APMENU00 --> APMENU01
+  APMENU00 --> APMENU02
+  APMENU00 --> APMENU03
+  APMENU00 --> APMENU04
+  APMENU00 --> APMENU10
+  APMENU00 --> APMENU30
+  APMENU00 --> APMENU31
+  APMENU00 --> APMENU40
+
 }

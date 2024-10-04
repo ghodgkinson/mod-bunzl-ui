@@ -1,108 +1,42 @@
-# Overview Analysis of AS400 Source Code
+## Overview Analysis of AS400 Source Code
 
-## Files
+The provided data represents a dynamic menu system used in an AS400 environment. This system is designed to manage various business operations through a structured menu hierarchy. The data is organized in CSV format, detailing menu options, user access, and company configurations. This analysis will break down the components and their relationships, providing insights into the structure and functionality of the system.
 
-### DSCOREG (PhysicalFile)
-- **Description**: Corporate Company/Region File.
-- **Fields**: Includes fields like `CRCO#`, `CRREG`, `CRCNM`, `CRDIV`, `CRIND`, `CREXD`, `CRCNTR`, `CRFL01`, `CRFL02`, `CRREGO`, `CR198O`, `CRMID#`, `CRLANG`, `CRDATF`, `CRARTC`, `CRVERT`, `CRVCO`, `CRSFA`, `CR$CD`, `CRRCY`, `CRHAZT`, `CRCLIB`, `CRRLIB`, `CRBLUM`, `CRBLWF`, `CRRPT`, `CRVIPQL`, `CRIMPF`, `CRBRID`, `CRACTG`, `CRBAPV`, `CRPBYC`, `CRCLNT`, `CRFIPT`, `CRMRCID`, `CRMRCREF`, `CRMRCTKN`, `CRMRCJSK`, `CRHRR`, `CRVRSDT`, `CRCHPCAR`, `CRPNPGRP`, `CRSDTRAR`, `CRSRVLIB`, `CRBCSPOD`, `CRC2FO`, `CRORDACK`, `CRCSTSNT`, `CRLYRADJ`, `CRIDLR`.
-- **Keys**: `CRCO#`, `CRREG`.
+### Key Components
 
-### BUUSERS (PhysicalFile)
-- **Description**: Contains user information from DSUSERS & FIUSERS.
-- **Fields**: `USRNAM`, `USRCO#`, `USRLCN`, `USRLCR`, `USRCFL`, `USRLFL`, `USRLFR`, `USRCST`, `USRMCS`, `USRSHL`, `USRMNU`, `USRAUT`, `USFIRC`, `USRC01` to `USRC12`, `USRSIT`, `USRDFL`, `USRRFL`, `USRRGR`, `USXCO#`.
-- **Keys**: `USRNAM`.
+1. **Menu Structure**: 
+   - The menu system is hierarchical, with main menus leading to submenus and options. Each menu and option is identified by a unique code.
+   - The `MENUhdr.csv` file defines the menu headers, including descriptions and access requirements.
+   - The `MENUOPT.csv` file contains the menu options, including the menu name, option number, type, descriptions in multiple languages, command to process the option, and other attributes.
 
-### BUUSERS1 (LogicalFile)
-- **Description**: Logical view of BUUSERS by company number and user name.
-- **Keys**: `USRCO#`, `USRNAM`.
+2. **Menu Types**:
+   - **M (Menu)**: Represents a menu that can lead to other submenus or options.
+   - **C (Command)**: Represents a command or action that can be executed.
+   - **P (Program)**: Represents a program that can be run.
 
-### BZUSERS (PhysicalFile)
-- **Description**: Contains user, company number, and default company.
-- **Fields**: `BZZNAM`, `BZZCO#`, `BZZDFT`, `BZZLCN`, `BZZLCR`.
-- **Keys**: `BZZNAM`, `BZZCO#`, `BZZDFT`.
+3. **Command to Process Option**:
+   - This field indicates the flow between menus and submenus, specifying the command or program to be executed when an option is selected.
 
-### BZUSERS1 (LogicalFile)
-- **Description**: Logical view of BZUSERS by user and default company.
-- **Keys**: `BZZNAM`, `BZZDFT`.
+4. **User Access**:
+   - The `BZUSERS.csv` file contains user information, including user names, company numbers, default indicators, location codes, and location restriction indicators.
+   - The `BUUSERS.csv` file details user access, including user names, company codes, location codes, and various flags indicating permissions and restrictions.
+   - The `SCDATA.csv` file contains the menu options and their configurations, detailing user access to specific menu options.
 
-### MENUOPT (PhysicalFile)
-- **Description**: Bunzl system menu options.
-- **Fields**: `MNUPGM`, `MNUOPTION`, `MNUTYPE`, `MNUDESCE`, `MNUDESCF`, `MNUDESCS`, `MNURUNCMD`, `MNUEFFDATE`, `MNUHIDE`, `MNUUPD`, `MNUUSAGE`.
-- **Keys**: `MNUPGM`, `MNUOPTION`.
+5. **Company Configuration**:
+   - The `DSCOREG.csv` file provides configuration details for different companies, including company names, regions, and various operational flags.
 
-### MNUUSR (PhysicalFile)
-- **Description**: Determines if a user is authorized to change generic attention key menu data.
-- **Fields**: `MNAUSER`, `MNACHGUSR`, `MNAEDTDTA`, `MNAPGM`, `MNASHAU`, `MNALANG`, `MNAHIDE`, `MNAF11`, `MNACO#`, `MNAPOS`.
-- **Keys**: `MNAUSER`, `MNACO#`.
+### System Functionality
 
-### SCINQUSR (PhysicalFile)
-- **Description**: Allows users access to inquiry menu options.
-- **Fields**: `SCIICUS`, `SCIIDUS`, `SCIIACT`, `SCIIPGMR`.
-- **Keys**: `SCIICUS`, `SCIIACT`.
+- **Dynamic Menu System**: The system is designed to be flexible, allowing for easy updates and modifications to the menu structure without altering the underlying code. This is achieved through the use of CSV files to define menu options and their relationships.
 
-### SCINQUSR1 (LogicalFile)
-- **Description**: Logical view of SCINQUSR by development profile.
-- **Keys**: `SCIIDUS`, `SCIIACT`.
+- **User Access Control**: User access is controlled through the `BZUSERS.csv`, `BUUSERS.csv`, and `SCDATA.csv` files. Each user is associated with specific companies and menu options, allowing for tailored access based on their role and responsibilities.
 
-### SCDATA (PhysicalFile)
-- **Description**: Contains user data and group profile fields for single sign-on.
-- **Fields**: `SCNAME`, `SCMENU`, `SCOPT#`, `SCXCO#`, `SCXGRP`, `SCEXPD`, `SCADUS`, `SCADDT`, `SCADTM`, `SCCHUS`, `SCCHDT`, `SCCHTM`, `SCFROM`.
-- **Keys**: `SCNAME`, `SCMENU`, `SCOPT#`.
+- **Multilingual Support**: Menu descriptions are provided in English, French, and Spanish, indicating support for multiple languages. This is crucial for applications used in diverse linguistic environments.
 
-### SCDATA4 (LogicalFile)
-- **Description**: Menu authorization file by company number, user, menu, and name.
-- **Keys**: `SCXCO#`, `SCNAME`, `SCMENU`, `SCOPT#`.
+- **Special Authority and Device Compatibility**: Menus can be configured to require special authority, ensuring that sensitive functions are protected. Additionally, menus can be marked as available on handheld devices, supporting mobile access.
 
-### MENUOPT1 (LogicalFile)
-- **Description**: MENUOPT file by run command, type, and option number.
-- **Keys**: `MNURUNCMD`, `MNUTYPE`, `MNUOPTION`.
+- **Integration and Automation**: The system appears to support integration with other systems and automation of tasks, as indicated by options related to EDI (Electronic Data Interchange) and automated processing.
 
-### MENUJMP (PhysicalFile)
-- **Description**: Personal settings for menu.
-- **Fields**: `JMUSER`, `JMDATA`.
-- **Keys**: `JMUSER`.
+### Conclusion
 
-### MNUUSG (PhysicalFile)
-- **Description**: Menu option usage tracking file.
-- **Fields**: `LOGCO#`, `LOGLOC`, `LOGNAM`, `LOGOPT`, `LOGRPT`, `LOGUSR`, `LOGDAT`, `LOGCMD`, `LOGTIMEST`.
-- **Keys**: `LOGCO#`, `LOGLOC`, `LOGNAM`, `LOGOPT`, `LOGRPT`, `LOGUSR`, `LOGDAT`.
-
-## CopyBook
-
-### UT0500 (Prototypes)
-- **Description**: Prototype for call to error message subfile program.
-- **Parameters**: `P_Act`, `P_MsgId`, `P_Msg`, `P_Prog`.
-
-## RPG Programs
-
-### MNU003 (Program)
-- **Description**: Replacement program for Bunzl menu system.
-- **Modifications**: Includes various modifications for standardization, user selections, error handling, and additional functionalities.
-- **Files Used**: `MENUOPT`, `MNUUSR`, `MENUHDR`, `SCINQUSR`, `SCINQUSR1`, `SCDATA4`, `SCDATA1`, `SCDATA`, `MENUOPT1`, `MENUJMP`, `MNUUSG`.
-- **Subroutines**: `SFLNEW`, `FindGUAuth`, `SFLLOD`, `DSPLAY`, `ProcessJump`, `ChangeOutQ`, `Sflprc`, `CheckAuth`, `AddToList`, `SubFromList`, `WRITEMSG`, `REMOVEMSG`, `HelpScreen`, `SetJump`, `GETF3DATA`, `FindFromMenu`, `CHECK4RPT`, `GETLDA`.
-
-### DSB002 (Program)
-- **Description**: Gets user data from user control file and places it in LDA.
-- **Modifications**: Includes modifications for adding flags and replacing files.
-- **Files Used**: `BUUSERS1`, `BZUSERS1`, `DSCOREG`.
-
-### UT0500 (Program)
-- **Description**: Handles error message subfile program.
-- **Subroutines**: `WriteMsg`, `RemoveMsg`.
-
-## Screens
-
-### MNU003FM (DisplayFile)
-- **Description**: Displays a generic menu with options based on the Bunzl menu system.
-- **Modifications**: Includes modifications for adding menu options, changing command key layout, and removing certain options.
-- **Record Formats**: `MNU003S1`, `MNU003C1`, `MNU003M1`, `MNU003SM`, `MNU003CM`, `MNU003S2`, `MNU003C2`, `MNU003M2`.
-
-## CL Program
-
-### MNU003CL (Program)
-- **Description**: Calls the DSB002 program to get user data and then calls the MNU003 program.
-- **Modifications**: Includes logic to check the number of allowable sign-ons.
-- **Variables**: `FRMENU`, `TOMENU`, `OUTQ`, `LIBTHERE`.
-
-## Summary
-The provided AS400 source code includes various files, programs, and display files that are part of a system for managing user data, menu options, and error handling. The code is well-documented with comments and modifications, indicating a history of updates and enhancements. The programs interact with multiple files to retrieve and display data, handle user inputs, and manage error messages. The display files define the layout and functionality of the user interface, while the CL program orchestrates the execution of the main programs.
+The AS400 source code represents a robust and flexible menu system that supports dynamic configuration, user-specific access control, multilingual support, and device compatibility. It emphasizes flexibility, multilingual support, and detailed user and company management, making it suitable for complex organizational needs. The system's design allows for easy updates and integration with other business processes, enhancing its utility in a dynamic business environment.

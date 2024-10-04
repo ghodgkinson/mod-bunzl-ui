@@ -21,3 +21,7 @@ Commands run using the Prolifics Code Profiler and Transformer tool...
 ../../as400-modernizer/dist/as400mod follow-up-question  . "In a previous answer you gave 'View Reports', 'User Management' and 'System Settings' as examples. Where did you get those from in the files? Were they made up examples?"
 
 ../../as400-modernizer/dist/as400mod extract-psm  . neo4j
+
+../../as400-modernizer/dist/as400mod user-experience -o ../docs/user_experience_report/user_experience_report.md --visualize --domain-hints ../../as400-modernizer/templates/domain_specific_hints/as400_dynamic_ui.hints ./menu-data
+
+../../as400-modernizer/dist/as400mod analyze -o ../docs/analysis_report/analysis_report.md  --domain-hints ../../as400-modernizer/templates/domain_specific_hints/as400_dynamic_ui.hints ./menu-data
